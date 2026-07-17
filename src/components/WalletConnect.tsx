@@ -8,7 +8,7 @@ import {
   useChainId,
   useSwitchChain,
 } from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
+import { base, baseSepolia } from "wagmi/chains";
 
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -41,10 +41,10 @@ export function WalletConnect() {
 
   if (isConnected && address) {
     const chainLabel =
-      chainId === sepolia.id
-        ? "Sepolia"
-        : chainId === mainnet.id
-          ? "Ethereum"
+      chainId === baseSepolia.id
+        ? "Base Sepolia"
+        : chainId === base.id
+          ? "Base"
           : `Chain ${chainId}`;
 
     return (
@@ -55,13 +55,13 @@ export function WalletConnect() {
           <span className="wallet-chain">{chainLabel}</span>
         </div>
         <div className="wallet-actions">
-          {chainId !== sepolia.id && (
+          {chainId !== baseSepolia.id && chainId !== base.id && (
             <button
               type="button"
               className="cta-ghost"
-              onClick={() => switchChain({ chainId: sepolia.id })}
+              onClick={() => switchChain({ chainId: baseSepolia.id })}
             >
-              Use Sepolia
+              Use Base Sepolia
             </button>
           )}
           <button

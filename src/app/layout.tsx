@@ -17,7 +17,7 @@ const karla = Karla({
 export const metadata: Metadata = {
   title: "Folio — IP tokenization",
   description:
-    "Connect your Web3 wallet and upload a copyright certificate to tokenize intellectual property with Folio.",
+    "Connect your Web3 wallet, upload a copyright certificate, and mint unique IP as an ERC-721 on Base.",
 };
 
 export default function RootLayout({

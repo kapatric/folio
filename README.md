@@ -1,6 +1,6 @@
 # Folio
 
-IP tokenization app — Next.js front-end for connecting a Web3 wallet and uploading a copyright certificate.
+IP tokenization app — connect a Web3 wallet, upload a copyright certificate, and mint it as a unique ERC-721 on Base.
 
 ## Getting started
 
@@ -11,12 +11,35 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-### Optional
+### Optional env
 
-Set `NEXT_PUBLIC_WC_PROJECT_ID` to enable WalletConnect (get a project id from [WalletConnect Cloud](https://cloud.walletconnect.com/)). Injected wallets (e.g. MetaMask) and Coinbase Wallet work without it.
+Copy `.env.example` → `.env.local`:
+
+- `NEXT_PUBLIC_WC_PROJECT_ID` — WalletConnect (MetaMask/Coinbase work without it)
+- `NEXT_PUBLIC_FOLIO_IP_ADDRESS` — deployed `FolioIP` contract on Base or Base Sepolia
+
+## Smart contract (Base)
+
+```bash
+cd contracts
+forge test -vv
+```
+
+Deploy to Base Sepolia:
+
+```bash
+cd contracts
+forge script script/DeployFolioIP.s.sol:DeployFolioIP \
+  --rpc-url $BASE_SEPOLIA_RPC_URL \
+  --broadcast \
+  --private-key $PRIVATE_KEY
+```
+
+See [`contracts/README.md`](contracts/README.md) for Base mainnet and verification.
 
 ## Stack
 
 - Next.js App Router + TypeScript + Tailwind CSS
-- wagmi + viem for wallet connection
+- wagmi + viem (Base / Base Sepolia)
+- Foundry `FolioIP` ERC-721 — unique mint per certificate content hash
 - `/api/upload` validates certificate uploads bound to a wallet address

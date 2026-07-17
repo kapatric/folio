@@ -8,6 +8,8 @@ import {
   useState,
 } from "react";
 import { useAccount } from "wagmi";
+import { keccak256 } from "viem";
+import { MintIP } from "@/components/MintIP";
 
 const ACCEPTED_TYPES = [
   "application/pdf",
@@ -27,6 +29,7 @@ type UploadState =
       certificateId: string;
       originalName: string;
       size: number;
+      contentHash: `0x${string}`;
     }
   | { status: "error"; message: string; file?: File };
 
@@ -76,6 +79,9 @@ export function CertificateUpload() {
     formData.append("walletAddress", address);
 
     try {
+      const buffer = await file.arrayBuffer();
+      const contentHash = keccak256(new Uint8Array(buffer));
+
       setState({ status: "uploading", file, progress: 55 });
       const response = await fetch("/api/upload", {
         method: "POST",
@@ -100,6 +106,7 @@ export function CertificateUpload() {
         certificateId: payload.certificateId,
         originalName: payload.originalName || file.name,
         size: payload.size || file.size,
+        contentHash,
       });
     } catch (error) {
       setState({
@@ -203,6 +210,11 @@ export function CertificateUpload() {
             >
               Replace file
             </button>
+            <MintIP
+              contentHash={state.contentHash}
+              certificateId={state.certificateId}
+              originalName={state.originalName}
+            />
           </div>
         ) : (
           <>

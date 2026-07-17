@@ -20,8 +20,8 @@ export default function Home() {
           <p className="brand-hero">Folio</p>
           <h1>Prove authorship. Tokenize the rights.</h1>
           <p className="hero-lede">
-            Connect a wallet and upload your copyright certificate to start
-            anchoring intellectual property on-chain.
+            Connect a wallet, upload your copyright certificate, and mint it as
+            a unique ERC-721 on Base.
           </p>
           <div className="hero-cta">
             <WalletConnect />
