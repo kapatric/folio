@@ -1,5 +1,5 @@
 import { http, createConfig, createStorage, cookieStorage } from "wagmi";
-import { mainnet, sepolia } from "wagmi/chains";
+import { base, baseSepolia } from "wagmi/chains";
 import { coinbaseWallet, injected, walletConnect } from "@wagmi/connectors";
 
 const walletConnectProjectId =
@@ -14,7 +14,7 @@ const connectors = [
           projectId: walletConnectProjectId,
           metadata: {
             name: "Folio",
-            description: "IP tokenization — upload copyright certificates on-chain",
+            description: "IP tokenization — mint copyright certificates on Base",
             url: "https://folio.app",
             icons: [],
           },
@@ -24,11 +24,11 @@ const connectors = [
 ];
 
 export const config = createConfig({
-  chains: [mainnet, sepolia],
+  chains: [baseSepolia, base],
   connectors,
   transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http(),
+    [baseSepolia.id]: http(),
+    [base.id]: http(),
   },
   ssr: true,
   storage: createStorage({
