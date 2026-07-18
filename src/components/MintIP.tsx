@@ -11,6 +11,12 @@ import {
 import { base, baseSepolia } from "wagmi/chains";
 import { explorerTokenUrl, folioIpAbi, folioIpAddress } from "@/lib/folioIp";
 
+function chainFromId(chainId: number) {
+  if (chainId === base.id) return base;
+  if (chainId === baseSepolia.id) return baseSepolia;
+  return baseSepolia;
+}
+
 type MintIPProps = {
   contentHash: `0x${string}`;
   certificateId: string;
@@ -96,6 +102,8 @@ export function MintIP({
       abi: folioIpAbi,
       functionName: "mintIP",
       args: [address, contentHash, certificateId, tokenURI],
+      chain: chainFromId(chainId),
+      account: address,
     });
   }
 
