@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { AuthForm } from "@/components/AuthForm";
-import { AuthNav } from "@/components/AuthNav";
+import { SiteHeader } from "@/components/SiteHeader";
 import { getSessionCustomer } from "@/lib/auth/session";
 import { redirect } from "next/navigation";
 
@@ -26,10 +26,7 @@ export default async function LoginPage() {
         <div className="atmosphere-orb atmosphere-orb-b" />
       </div>
 
-      <header className="site-header">
-        <p className="brand-mark">Folio</p>
-        <AuthNav />
-      </header>
+      <SiteHeader />
 
       <main className="auth-hero">
         <div className="auth-hero-copy">

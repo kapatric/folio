@@ -1,10 +1,11 @@
-import { AuthNav } from "@/components/AuthNav";
+import { AboutSection } from "@/components/AboutSection";
 import { CertificateUpload } from "@/components/CertificateUpload";
+import { SiteHeader } from "@/components/SiteHeader";
 import { WalletConnect } from "@/components/WalletConnect";
 
 export default function Home() {
   return (
-    <div className="page-shell">
+    <div className="page-shell home-shell">
       <div className="atmosphere" aria-hidden="true">
         <div className="atmosphere-wash" />
         <div className="atmosphere-grid" />
@@ -12,10 +13,7 @@ export default function Home() {
         <div className="atmosphere-orb atmosphere-orb-b" />
       </div>
 
-      <header className="site-header">
-        <p className="brand-mark">Folio</p>
-        <AuthNav />
-      </header>
+      <SiteHeader />
 
       <main className="hero">
         <div className="hero-copy">
@@ -40,7 +38,11 @@ export default function Home() {
         </div>
       </main>
 
-      <CertificateUpload />
+      <div id="tokenize">
+        <CertificateUpload />
+      </div>
+
+      <AboutSection />
 
       <footer className="site-footer">
         <p>Folio · IP tokenization</p>

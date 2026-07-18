@@ -1,0 +1,146 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useId, useRef, useState } from "react";
+
+type CustomerSummary = {
+  id: string;
+  fullName: string;
+  email: string;
+};
+
+type MenuLink = {
+  href: string;
+  label: string;
+};
+
+const NAV_LINKS: MenuLink[] = [
+  { href: "/", label: "Home" },
+  { href: "/about", label: "About" },
+  { href: "/#tokenize", label: "Tokenize" },
+  { href: "/login", label: "Sign in" },
+];
+
+export function HamburgerMenu() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const menuId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
+  const [customer, setCustomer] = useState<CustomerSummary | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    void fetch("/api/auth/me")
+      .then(async (response) => {
+        if (!response.ok) {
+          if (!cancelled) setCustomer(null);
+          return;
+        }
+        const data = (await response.json()) as { customer: CustomerSummary };
+        if (!cancelled) setCustomer(data.customer);
+      })
+      .catch(() => {
+        if (!cancelled) setCustomer(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  async function onLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    setCustomer(null);
+    setOpen(false);
+    router.push("/login");
+    router.refresh();
+  }
+
+  const links = NAV_LINKS.filter((link) => {
+    if (link.href === "/login" && customer) return false;
+    return true;
+  });
+
+  return (
+    <div className="hamburger" ref={rootRef}>
+      <button
+        type="button"
+        className={`hamburger-toggle${open ? " is-open" : ""}`}
+        aria-expanded={open}
+        aria-controls={menuId}
+        aria-label={open ? "Close menu" : "Open menu"}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="hamburger-line" aria-hidden="true" />
+        <span className="hamburger-line" aria-hidden="true" />
+        <span className="hamburger-line" aria-hidden="true" />
+      </button>
+
+      {open && (
+        <nav
+          id={menuId}
+          className="hamburger-dropdown"
+          aria-label="Primary"
+        >
+          <ul className="hamburger-list">
+            {links.map((link) => (
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className="hamburger-link"
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              </li>
+            ))}
+            {customer && (
+              <>
+                <li>
+                  <Link
+                    href="/account"
+                    className="hamburger-link"
+                    onClick={() => setOpen(false)}
+                  >
+                    Account
+                  </Link>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    className="hamburger-link hamburger-action"
+                    onClick={() => void onLogout()}
+                  >
+                    Sign out
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>
+        </nav>
+      )}
+    </div>
+  );
+}

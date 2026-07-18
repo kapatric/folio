@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AccountPanel } from "@/components/AccountPanel";
-import { AuthNav } from "@/components/AuthNav";
+import { SiteHeader } from "@/components/SiteHeader";
 import { getSessionCustomer } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -32,10 +32,7 @@ export default async function AccountPage() {
         <div className="atmosphere-orb atmosphere-orb-b" />
       </div>
 
-      <header className="site-header">
-        <p className="brand-mark">Folio</p>
-        <AuthNav />
-      </header>
+      <SiteHeader />
 
       <main className="account-main">
         <p className="brand-hero account-brand">Folio</p>
