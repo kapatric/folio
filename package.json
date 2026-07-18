@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "node scripts/ensure-lightningcss.js",
+    "clean": "rm -rf .next node_modules",
+    "reinstall": "npm run clean && npm install"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.2",
@@ -24,7 +27,15 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.10",
+    "lightningcss": "1.32.0",
     "tailwindcss": "^4",
     "typescript": "^5"
+  },
+  "optionalDependencies": {
+    "lightningcss-darwin-arm64": "1.32.0",
+    "lightningcss-darwin-x64": "1.32.0",
+    "lightningcss-linux-arm64-gnu": "1.32.0",
+    "lightningcss-linux-x64-gnu": "1.32.0",
+    "lightningcss-win32-x64-msvc": "1.32.0"
   }
 }

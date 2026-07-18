@@ -11,6 +11,15 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Troubleshooting: `lightningcss.darwin-arm64.node`
+
+If `npm run dev` fails with `Cannot find module '../lightningcss.darwin-arm64.node'`, your `node_modules` is missing the Apple Silicon native binding (often after installing on another machine or skipping optional deps). Reinstall locally:
+
+```bash
+npm run reinstall
+npm run dev
+```
+
 ### Optional env
 
 Copy `.env.example` → `.env.local`:
