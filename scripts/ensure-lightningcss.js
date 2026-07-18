@@ -2,11 +2,15 @@
  * Verifies Tailwind's lightningcss native binding is present for this platform.
  * Root optionalDependencies should install it; this catches broken/cross-OS node_modules.
  */
-const fs = require("node:fs");
+import fs from "node:fs";
+import { createRequire } from "node:module";
+
+const require = createRequire(import.meta.url);
 
 function platformPackage() {
   const { platform, arch } = process;
-  if (platform === "darwin" && arch === "arm64") return "lightningcss-darwin-arm64";
+  if (platform === "darwin" && arch === "arm64")
+    return "lightningcss-darwin-arm64";
   if (platform === "darwin" && arch === "x64") return "lightningcss-darwin-x64";
   if (platform === "linux" && arch === "arm64") {
     return fs.existsSync("/etc/alpine-release")
@@ -18,8 +22,10 @@ function platformPackage() {
       ? "lightningcss-linux-x64-musl"
       : "lightningcss-linux-x64-gnu";
   }
-  if (platform === "win32" && arch === "arm64") return "lightningcss-win32-arm64-msvc";
-  if (platform === "win32" && arch === "x64") return "lightningcss-win32-x64-msvc";
+  if (platform === "win32" && arch === "arm64")
+    return "lightningcss-win32-arm64-msvc";
+  if (platform === "win32" && arch === "x64")
+    return "lightningcss-win32-x64-msvc";
   return null;
 }
 

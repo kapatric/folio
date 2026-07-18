@@ -4,6 +4,8 @@ IP tokenization app — connect a Web3 wallet, upload a copyright certificate, a
 
 ## Getting started
 
+This project requires Node.js `>= 20.9.0` to run correctly with Next.js 16.
+
 ```bash
 npm install
 npm run dev
