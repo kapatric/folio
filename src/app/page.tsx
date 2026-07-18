@@ -1,3 +1,4 @@
+import { AuthNav } from "@/components/AuthNav";
 import { CertificateUpload } from "@/components/CertificateUpload";
 import { WalletConnect } from "@/components/WalletConnect";
 
@@ -13,6 +14,7 @@ export default function Home() {
 
       <header className="site-header">
         <p className="brand-mark">Folio</p>
+        <AuthNav />
       </header>
 
       <main className="hero">

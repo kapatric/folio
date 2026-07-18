@@ -516,6 +516,162 @@ input {
   font-size: 0.92rem;
 }
 
+.field-success {
+  margin: 0;
+  color: var(--teal-deep);
+  font-size: 0.92rem;
+}
+
+.auth-nav,
+.auth-nav-placeholder {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-height: 2.35rem;
+}
+
+.auth-nav-link {
+  color: var(--ink);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-nav-link:hover {
+  color: var(--teal-deep);
+}
+
+.auth-hero {
+  display: grid;
+  gap: clamp(2rem, 5vw, 3.5rem);
+  align-items: start;
+  width: min(100% - 2.5rem, 980px);
+  margin: 0 auto;
+  padding: clamp(1rem, 3vw, 2rem) 0 clamp(3rem, 6vw, 4.5rem);
+  opacity: 0;
+  animation: rise-in 0.9s ease forwards 0.15s;
+}
+
+.auth-hero-copy {
+  max-width: 28rem;
+}
+
+.auth-panel {
+  width: min(100%, 420px);
+  justify-self: start;
+}
+
+.auth-mode-toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem;
+  margin-bottom: 1.1rem;
+}
+
+.auth-mode-toggle button {
+  min-height: 2.5rem;
+  border: 1px solid rgba(21, 32, 43, 0.16);
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.auth-mode-toggle button.is-active {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.auth-form {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.auth-field {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.auth-field span {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.auth-field input {
+  min-height: 2.75rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid rgba(21, 32, 43, 0.2);
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--ink);
+}
+
+.auth-field input:focus {
+  outline: 2px solid rgba(15, 110, 102, 0.35);
+  outline-offset: 1px;
+  border-color: var(--teal);
+}
+
+.auth-footnote {
+  margin: 1rem 0 0;
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.auth-footnote a {
+  color: var(--teal-deep);
+}
+
+.account-main {
+  width: min(100% - 2.5rem, 720px);
+  margin: 0 auto 4rem;
+  padding-top: 0.5rem;
+  opacity: 0;
+  animation: rise-in 0.9s ease forwards 0.15s;
+}
+
+.account-brand {
+  margin-bottom: 0.75rem;
+  font-size: clamp(2.8rem, 8vw, 4.5rem);
+}
+
+.account-section {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.account-meta {
+  display: grid;
+  gap: 0.85rem;
+  margin: 0;
+}
+
+.account-meta div {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.account-meta dt {
+  color: var(--ink-soft);
+  font-size: 0.88rem;
+}
+
+.account-meta dd {
+  margin: 0;
+  font-weight: 500;
+}
+
+@media (min-width: 900px) {
+  .auth-hero {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    align-items: center;
+    min-height: calc(100svh - 5rem);
+  }
+
+  .auth-panel {
+    justify-self: end;
+  }
+}
+
 .mint-panel {
   display: grid;
   gap: 0.65rem;
