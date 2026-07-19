@@ -22,8 +22,8 @@ export function DocumentsWorkspace() {
         <div className="section-copy">
           <h2 id="workflow-heading">Upload</h2>
           <p>
-            Add documents to your encrypted Folio vault. Connect a wallet when
-            you are ready to mint.
+            Add documents to your encrypted Folio vault. Link a wallet when you
+            are ready to mint.
           </p>
         </div>
         <div className="account-wallet">

@@ -1,15 +1,24 @@
 "use client";
 
-import { useState, useSyncExternalStore, useEffect, useRef } from "react";
+import {
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import {
   useAccount,
   useConnect,
   useDisconnect,
   useChainId,
   useSwitchChain,
+  type Connector,
 } from "wagmi";
 import { base, baseSepolia } from "wagmi/chains";
 import { updateProfileRequest } from "@/lib/api/client";
+import { hasWalletConnect } from "@/lib/wagmi";
 
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -23,25 +32,111 @@ function useIsClient() {
   );
 }
 
+type WalletOption = {
+  key: string;
+  connector: Connector;
+  label: string;
+  hint: string;
+};
+
+function describeConnector(connector: Connector): {
+  label: string;
+  hint: string;
+  rank: number;
+} {
+  const id = connector.id.toLowerCase();
+  const name = connector.name.toLowerCase();
+
+  if (id.includes("metamask") || name.includes("metamask")) {
+    return {
+      label: "MetaMask",
+      hint: "Browser extension or MetaMask mobile",
+      rank: 0,
+    };
+  }
+  if (id.includes("coinbase") || name.includes("coinbase")) {
+    return {
+      label: "Coinbase Wallet",
+      hint: "Coinbase app or browser extension",
+      rank: 1,
+    };
+  }
+  if (id.includes("walletconnect") || name.includes("walletconnect")) {
+    return {
+      label: "WalletConnect",
+      hint: "Rainbow, Trust, Ledger, OKX, and more",
+      rank: 2,
+    };
+  }
+  if (id.includes("brave") || name.includes("brave")) {
+    return {
+      label: "Brave Wallet",
+      hint: "Built into the Brave browser",
+      rank: 3,
+    };
+  }
+  return {
+    label: connector.name || "Browser wallet",
+    hint: "Rabby, Frame, or another injected wallet",
+    rank: 4,
+  };
+}
+
+function buildWalletOptions(connectors: readonly Connector[]): WalletOption[] {
+  const seen = new Set<string>();
+  const options: WalletOption[] = [];
+
+  for (const connector of connectors) {
+    const meta = describeConnector(connector);
+    const dedupeKey =
+      meta.rank <= 2 ? meta.label : `${meta.label}:${connector.uid}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
+    options.push({
+      key: connector.uid,
+      connector,
+      label: meta.label,
+      hint: meta.hint,
+    });
+  }
+
+  return options.sort(
+    (a, b) =>
+      describeConnector(a.connector).rank -
+      describeConnector(b.connector).rank,
+  );
+}
+
 type WalletConnectProps = {
   /** When true, push the connected address into the Folio profile API. */
   syncProfile?: boolean;
   onProfileSynced?: () => void;
+  /** Primary button label. */
+  label?: string;
 };
 
 export function WalletConnect({
   syncProfile = false,
   onProfileSynced,
+  label = "Link wallet",
 }: WalletConnectProps) {
   const isClient = useIsClient();
+  const menuId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
   const { address, isConnected, isConnecting } = useAccount();
-  const { connect, connectors, isPending, error } = useConnect();
+  const { connect, connectors, isPending, error, reset } = useConnect();
   const { disconnect } = useDisconnect();
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const lastSynced = useRef<string | null>(null);
+
+  const walletOptions = useMemo(
+    () => buildWalletOptions(connectors),
+    [connectors],
+  );
 
   useEffect(() => {
     if (!syncProfile || !isConnected || !address) return;
@@ -52,7 +147,7 @@ export function WalletConnect({
       .then(() => {
         if (cancelled) return;
         lastSynced.current = address.toLowerCase();
-        setSyncMessage("Wallet saved to encrypted profile.");
+        setSyncMessage("Wallet linked to your encrypted profile.");
         onProfileSynced?.();
       })
       .catch(() => {
@@ -66,10 +161,31 @@ export function WalletConnect({
     };
   }, [syncProfile, isConnected, address, onProfileSynced]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+
+    function onPointerDown(event: MouseEvent) {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") setMenuOpen(false);
+    }
+
+    document.addEventListener("mousedown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
   if (!isClient) {
     return (
       <button type="button" className="cta-primary" disabled>
-        Connect wallet
+        {label}
       </button>
     );
   }
@@ -108,7 +224,7 @@ export function WalletConnect({
               disconnect();
             }}
           >
-            Disconnect
+            Unlink wallet
           </button>
         </div>
         {syncMessage && <p className="upload-hint">{syncMessage}</p>}
@@ -117,36 +233,66 @@ export function WalletConnect({
   }
 
   return (
-    <div className="wallet-connect">
+    <div className="wallet-connect" ref={rootRef}>
       <button
         type="button"
         className="cta-primary"
         aria-expanded={menuOpen}
+        aria-controls={menuId}
         aria-haspopup="listbox"
         disabled={isConnecting || isPending}
-        onClick={() => setMenuOpen((open) => !open)}
+        onClick={() => {
+          reset();
+          setMenuOpen((open) => !open);
+        }}
       >
-        {isPending || isConnecting ? "Connecting…" : "Connect wallet"}
+        {isPending || isConnecting ? "Connecting…" : label}
       </button>
 
       {menuOpen && (
-        <ul className="wallet-menu" role="listbox" aria-label="Choose a wallet">
-          {connectors.map((connector) => (
-            <li key={connector.uid}>
-              <button
-                type="button"
-                role="option"
-                aria-selected={false}
-                className="wallet-option"
-                onClick={() => {
-                  connect({ connector });
-                  setMenuOpen(false);
-                }}
-              >
-                {connector.name}
-              </button>
+        <ul
+          id={menuId}
+          className="wallet-menu"
+          role="listbox"
+          aria-label="Popular crypto wallets"
+        >
+          {walletOptions.map((option) => {
+            const busy = pendingId === option.connector.uid && isPending;
+            return (
+              <li key={option.key}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={false}
+                  className="wallet-option"
+                  disabled={isPending}
+                  onClick={() => {
+                    setPendingId(option.connector.uid);
+                    connect(
+                      { connector: option.connector },
+                      {
+                        onSettled: () => {
+                          setPendingId(null);
+                          setMenuOpen(false);
+                        },
+                      },
+                    );
+                  }}
+                >
+                  <span className="wallet-option-label">
+                    {busy ? `Connecting ${option.label}…` : option.label}
+                  </span>
+                  <span className="wallet-option-hint">{option.hint}</span>
+                </button>
+              </li>
+            );
+          })}
+          {!hasWalletConnect && (
+            <li className="wallet-menu-note">
+              Add <code>NEXT_PUBLIC_WC_PROJECT_ID</code> to enable WalletConnect
+              (Rainbow, Trust, Ledger, and more).
             </li>
-          ))}
+          )}
         </ul>
       )}
 
