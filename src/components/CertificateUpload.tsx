@@ -10,14 +10,23 @@ import {
 import { useAccount } from "wagmi";
 import { keccak256 } from "viem";
 import { MintIP } from "@/components/MintIP";
+import {
+  ACCEPTED_EXTENSIONS,
+  DOCUMENT_TYPE_LABELS,
+  DOCUMENT_TYPES,
+  MAX_DOCUMENT_BYTES,
+  type DocumentType,
+} from "@/lib/documents/types";
 
 const ACCEPTED_TYPES = [
   "application/pdf",
   "image/png",
   "image/jpeg",
   "image/webp",
+  "text/plain",
+  "application/msword",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
 ];
-const MAX_BYTES = 12 * 1024 * 1024;
 
 type UploadState =
   | { status: "idle" }
@@ -30,6 +39,8 @@ type UploadState =
       originalName: string;
       size: number;
       contentHash: `0x${string}`;
+      documentType: DocumentType;
+      linkedToAccount: boolean;
     }
   | { status: "error"; message: string; file?: File };
 
@@ -41,9 +52,9 @@ function formatBytes(bytes: number) {
 
 function validateFile(file: File): string | null {
   if (!ACCEPTED_TYPES.includes(file.type)) {
-    return "Upload a PDF or image (PNG, JPEG, WebP).";
+    return "Upload a PDF, image, text, or Word document.";
   }
-  if (file.size > MAX_BYTES) {
+  if (file.size > MAX_DOCUMENT_BYTES) {
     return "File must be 12 MB or smaller.";
   }
   return null;
@@ -51,8 +62,11 @@ function validateFile(file: File): string | null {
 
 export function CertificateUpload() {
   const inputId = useId();
+  const typeId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
   const { isConnected, address } = useAccount();
+  const [documentType, setDocumentType] =
+    useState<DocumentType>("copyright_certificate");
   const [state, setState] = useState<UploadState>({ status: "idle" });
   const [dragging, setDragging] = useState(false);
 
@@ -66,7 +80,7 @@ export function CertificateUpload() {
     if (!isConnected || !address) {
       setState({
         status: "error",
-        message: "Connect your wallet before uploading a certificate.",
+        message: "Connect your wallet before uploading a document.",
         file,
       });
       return;
@@ -75,8 +89,10 @@ export function CertificateUpload() {
     setState({ status: "uploading", file, progress: 18 });
 
     const formData = new FormData();
+    formData.append("document", file);
     formData.append("certificate", file);
     formData.append("walletAddress", address);
+    formData.append("documentType", documentType);
 
     try {
       const buffer = await file.arrayBuffer();
@@ -86,6 +102,7 @@ export function CertificateUpload() {
       const response = await fetch("/api/upload", {
         method: "POST",
         body: formData,
+        credentials: "same-origin",
       });
       setState({ status: "uploading", file, progress: 88 });
 
@@ -94,6 +111,8 @@ export function CertificateUpload() {
         certificateId?: string;
         originalName?: string;
         size?: number;
+        linkedToAccount?: boolean;
+        documentType?: DocumentType;
       };
 
       if (!response.ok || !payload.certificateId) {
@@ -107,6 +126,8 @@ export function CertificateUpload() {
         originalName: payload.originalName || file.name,
         size: payload.size || file.size,
         contentHash,
+        documentType: payload.documentType || documentType,
+        linkedToAccount: Boolean(payload.linkedToAccount),
       });
     } catch (error) {
       setState({
@@ -145,12 +166,30 @@ export function CertificateUpload() {
   return (
     <section className="upload-section" aria-labelledby="upload-heading">
       <div className="section-copy">
-        <h2 id="upload-heading">Copyright certificate</h2>
+        <h2 id="upload-heading">Secure document vault</h2>
         <p>
-          Drop your official certificate. Folio binds it to your connected
-          wallet for tokenization.
+          Upload certificates and supporting files. Folio encrypts them at rest
+          and links them to your wallet for tokenization.
         </p>
       </div>
+
+      <label className="auth-field upload-type-field" htmlFor={typeId}>
+        <span>Document type</span>
+        <select
+          id={typeId}
+          value={documentType}
+          onChange={(event) =>
+            setDocumentType(event.target.value as DocumentType)
+          }
+          disabled={state.status === "uploading"}
+        >
+          {DOCUMENT_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {DOCUMENT_TYPE_LABELS[type]}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div
         className={`upload-dropzone${dragging ? " is-dragging" : ""}${
@@ -171,7 +210,7 @@ export function CertificateUpload() {
           id={inputId}
           type="file"
           className="sr-only"
-          accept=".pdf,image/png,image/jpeg,image/webp"
+          accept={ACCEPTED_EXTENSIONS}
           disabled={!isConnected || state.status === "uploading"}
           onChange={onInputChange}
         />
@@ -182,7 +221,7 @@ export function CertificateUpload() {
 
         {state.status === "uploading" ? (
           <div className="upload-progress">
-            <p>Securing {state.file.name}…</p>
+            <p>Encrypting & storing {state.file.name}…</p>
             <div
               className="progress-track"
               role="progressbar"
@@ -195,11 +234,19 @@ export function CertificateUpload() {
           </div>
         ) : state.status === "success" ? (
           <div className="upload-success">
-            <p className="upload-success-title">Certificate ready</p>
+            <p className="upload-success-title">Stored securely</p>
             <p>
               <strong>{state.originalName}</strong> · {formatBytes(state.size)}
             </p>
-            <p className="upload-id">ID {state.certificateId}</p>
+            <p className="upload-id">
+              {DOCUMENT_TYPE_LABELS[state.documentType]} · ID{" "}
+              {state.certificateId}
+            </p>
+            <p className="upload-hint">
+              {state.linkedToAccount
+                ? "Linked to your Folio account. Manage downloads from Account."
+                : "Encrypted on the server. Sign in before upload to attach it to your account."}
+            </p>
             <button
               type="button"
               className="cta-ghost"
@@ -208,22 +255,27 @@ export function CertificateUpload() {
                 inputRef.current?.click();
               }}
             >
-              Replace file
+              Upload another
             </button>
-            <MintIP
-              contentHash={state.contentHash}
-              certificateId={state.certificateId}
-              originalName={state.originalName}
-            />
+            {state.documentType === "copyright_certificate" && (
+              <MintIP
+                contentHash={state.contentHash}
+                certificateId={state.certificateId}
+                originalName={state.originalName}
+              />
+            )}
           </div>
         ) : (
           <>
             <p className="upload-prompt">
               {isConnected
-                ? "Drag & drop your certificate, or browse"
+                ? "Drag & drop a document, or browse"
                 : "Connect a wallet to enable uploads"}
             </p>
-            <p className="upload-hint">PDF, PNG, JPEG, or WebP · up to 12 MB</p>
+            <p className="upload-hint">
+              PDF, PNG, JPEG, WebP, TXT, DOC, DOCX · up to 12 MB · encrypted at
+              rest
+            </p>
             <button
               type="button"
               className="cta-secondary"

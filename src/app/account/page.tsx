@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AccountPanel } from "@/components/AccountPanel";
+import { DocumentList } from "@/components/DocumentList";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getSessionCustomer } from "@/lib/auth/session";
 
@@ -37,6 +38,7 @@ export default async function AccountPage() {
       <main className="account-main">
         <p className="brand-hero account-brand">Folio</p>
         <AccountPanel customer={customer} />
+        <DocumentList />
       </main>
     </div>
   );
