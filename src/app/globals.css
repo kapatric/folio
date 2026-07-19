@@ -603,6 +603,12 @@ input {
   gap: 0.65rem;
 }
 
+.wallet-connect-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .wallet-status {
   display: inline-flex;
   flex-wrap: wrap;

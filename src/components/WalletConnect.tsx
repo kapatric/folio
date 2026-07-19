@@ -150,6 +150,32 @@ export function WalletConnect({
     () => buildWalletOptions(connectors),
     [connectors],
   );
+  const preferredConnector = useMemo(
+    () =>
+      walletOptions.find((option) => option.connector.ready)?.connector ?? null,
+    [walletOptions],
+  );
+  const hasAnyConnector = walletOptions.length > 0;
+
+  function handlePrimaryAction() {
+    reset();
+
+    if (preferredConnector) {
+      setPendingId(preferredConnector.uid);
+      connect(
+        { connector: preferredConnector },
+        {
+          onSettled: () => {
+            setPendingId(null);
+            setMenuOpen(false);
+          },
+        },
+      );
+      return;
+    }
+
+    setMenuOpen((open) => !open);
+  }
 
   useEffect(() => {
     if (!syncProfile || !isConnected || !address) return;
@@ -285,20 +311,32 @@ export function WalletConnect({
           reconnect that wallet (or choose another).
         </p>
       )}
-      <button
-        type="button"
-        className="cta-primary"
-        aria-expanded={menuOpen}
-        aria-controls={menuId}
-        aria-haspopup="listbox"
-        disabled={isConnecting || isPending}
-        onClick={() => {
-          reset();
-          setMenuOpen((open) => !open);
-        }}
-      >
-        {isPending || isConnecting ? "Connecting…" : actionLabel}
-      </button>
+      <div className="wallet-connect-actions">
+        <button
+          type="button"
+          className="cta-primary"
+          aria-expanded={menuOpen}
+          aria-controls={menuId}
+          aria-haspopup="listbox"
+          disabled={isConnecting || isPending}
+          onClick={handlePrimaryAction}
+        >
+          {isPending || isConnecting ? "Connecting…" : actionLabel}
+        </button>
+        {hasAnyConnector && (
+          <button
+            type="button"
+            className="cta-ghost"
+            disabled={isConnecting || isPending}
+            onClick={() => {
+              reset();
+              setMenuOpen((open) => !open);
+            }}
+          >
+            Choose wallet
+          </button>
+        )}
+      </div>
 
       {menuOpen && (
         <ul
