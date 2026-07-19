@@ -1,49 +1,22 @@
 import type { Metadata } from "next";
-import { redirect } from "next/navigation";
+import { AccountShell } from "@/components/AccountShell";
 import { AccountWelcome } from "@/components/AccountWelcome";
-import { AccountWorkspace } from "@/components/AccountWorkspace";
-import { SiteHeader } from "@/components/SiteHeader";
-import { getSessionCustomer } from "@/lib/auth/session";
+import { requireSessionCustomer } from "@/lib/auth/requireCustomer";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Account — Folio",
   description:
-    "Signed-in Folio workspace: upload documents, manage your encrypted profile, and tokenize IP.",
+    "Your Folio account hub: open account information or uploaded documents.",
 };
 
 export default async function AccountPage() {
-  let customer;
-  try {
-    customer = await getSessionCustomer();
-  } catch {
-    redirect("/login");
-  }
-
-  if (!customer) {
-    redirect("/login");
-  }
+  const customer = await requireSessionCustomer();
 
   return (
-    <div className="page-shell">
-      <div className="atmosphere" aria-hidden="true">
-        <div className="atmosphere-wash" />
-        <div className="atmosphere-grid" />
-        <div className="atmosphere-orb atmosphere-orb-a" />
-        <div className="atmosphere-orb atmosphere-orb-b" />
-      </div>
-
-      <SiteHeader />
-
-      <main className="account-main">
-        <AccountWelcome fullName={customer.fullName} email={customer.email} />
-        <AccountWorkspace customer={customer} />
-      </main>
-
-      <footer className="site-footer">
-        <p>Folio · Signed-in account</p>
-      </footer>
-    </div>
+    <AccountShell>
+      <AccountWelcome fullName={customer.fullName} email={customer.email} />
+    </AccountShell>
   );
 }

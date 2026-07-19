@@ -68,21 +68,23 @@ Optional overrides:
 ### Login & encrypted customer data
 
 - `/login` — create an account or sign in (redirects to `/account` after success)
-- `/account` — post-login workspace: document upload workflow, vault, and encrypted profile
+- `/account` — signed-in hub with links to account information and uploaded documents
+- `/account/profile` — encrypted profile and linked wallet
+- `/account/documents` — upload workflow and vault list
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob
 
 ### Secure document backend (signed-in only)
 
-- Document upload lives on `/account#tokenize` after login (not on the public home page)
+- Document upload lives on `/account/documents` after login (not on the public home page)
 - Frontend talks to the Next.js API through `src/lib/api/client.ts` (session cookies, same-origin)
 - `POST /api/upload` requires a session; encrypts and stores files under `.data/documents/`
 - Supported types: copyright certificate, contract, identity, supporting, other
 - Accepted files: PDF, PNG, JPEG, WebP, TXT, DOC, DOCX (max 12 MB)
 - Filenames and file bytes are encrypted at rest; SHA-256 content hash kept for integrity
 - List via `GET /api/documents`, download via `GET /api/documents/:id` (owner session only)
-- After upload, the account vault list refreshes; connecting a wallet can sync the address to your encrypted profile
+- After upload, the vault list refreshes; connecting a wallet can sync the address to your encrypted profile
 
 ## Smart contract (Base)
 

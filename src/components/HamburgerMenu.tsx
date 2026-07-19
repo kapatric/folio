@@ -19,8 +19,9 @@ type MenuLink = {
 const NAV_LINKS: MenuLink[] = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
-  { href: "/account#tokenize", label: "Documents" },
   { href: "/account", label: "Account" },
+  { href: "/account/profile", label: "Account information" },
+  { href: "/account/documents", label: "Uploaded documents" },
   { href: "/login", label: "Sign in" },
 ];
 
@@ -81,12 +82,7 @@ export function HamburgerMenu() {
 
   const links = NAV_LINKS.filter((link) => {
     if (link.href === "/login" && customer) return false;
-    if (
-      (link.href === "/account" || link.href.startsWith("/account#")) &&
-      !customer
-    ) {
-      return false;
-    }
+    if (link.href.startsWith("/account") && !customer) return false;
     return true;
   });
 

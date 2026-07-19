@@ -14,7 +14,15 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function DocumentList({ refreshKey = 0 }: { refreshKey?: number }) {
+type DocumentListProps = {
+  refreshKey?: number;
+  emptyHint?: string;
+};
+
+export function DocumentList({
+  refreshKey = 0,
+  emptyHint = "No documents yet. Upload above to add your first file.",
+}: DocumentListProps) {
   const [documents, setDocuments] = useState<PublicDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
@@ -69,9 +77,7 @@ export function DocumentList({ refreshKey = 0 }: { refreshKey?: number }) {
       )}
 
       {!error && documents.length === 0 && (
-        <p className="upload-hint">
-          No documents yet. Upload above in the document workflow.
-        </p>
+        <p className="upload-hint">{emptyHint}</p>
       )}
 
       {documents.length > 0 && (
