@@ -129,6 +129,12 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
           />
         </label>
 
+        {mode === "login" && (
+          <p className="auth-forgot">
+            <Link href="/forgot-password">Forgot password?</Link>
+          </p>
+        )}
+
         {error && (
           <p className="field-error" role="alert">
             {error}

@@ -239,6 +239,32 @@ export async function getPublicCustomerById(
   return toPublic(customer);
 }
 
+export async function updateCustomerPassword(
+  id: string,
+  password: string,
+): Promise<PublicCustomer> {
+  if (password.length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
+
+  const db = await ensureDb();
+  const index = db.customers.findIndex((customer) => customer.id === id);
+  if (index < 0) {
+    throw new Error("Account not found.");
+  }
+
+  const { salt, hash } = hashPassword(password);
+  const updated: StoredCustomer = {
+    ...db.customers[index],
+    passwordSalt: salt,
+    passwordHash: hash,
+    updatedAt: new Date().toISOString(),
+  };
+  db.customers[index] = updated;
+  await saveDb(db);
+  return toPublic(updated);
+}
+
 export async function updateCustomerProfile(
   id: string,
   updates: Partial<

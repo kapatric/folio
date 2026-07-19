@@ -803,6 +803,50 @@ input {
   justify-self: start;
 }
 
+.auth-panel-intro {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 1.1rem;
+}
+
+.auth-panel-intro h2 {
+  margin: 0;
+  font-family: var(--font-display), "Fraunces", serif;
+  font-size: 1.55rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.auth-panel-intro p {
+  margin: 0;
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+
+.auth-forgot {
+  margin: -0.25rem 0 0;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.auth-forgot a,
+.auth-inline-link {
+  color: var(--teal-deep);
+  text-decoration: underline;
+  text-underline-offset: 0.12em;
+}
+
+.auth-delivery-note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.auth-delivery-note code {
+  font-size: 0.82rem;
+}
+
 .auth-mode-toggle {
   display: grid;
   grid-template-columns: 1fr 1fr;

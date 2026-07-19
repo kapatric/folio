@@ -86,6 +86,31 @@ export function logoutRequest() {
   return apiFetch<{ ok: boolean }>("/api/auth/logout", { method: "POST" });
 }
 
+export function forgotPasswordRequest(body: { email: string }) {
+  return apiFetch<{
+    ok: true;
+    message: string;
+    delivery: "email" | "outbox";
+    resetUrl?: string;
+  }>("/api/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+}
+
+export function resetPasswordRequest(body: {
+  token: string;
+  password: string;
+}) {
+  return apiFetch<{ ok: true; customer: ApiCustomer }>(
+    "/api/auth/reset-password",
+    {
+      method: "POST",
+      body: JSON.stringify(body),
+    },
+  );
+}
+
 export function updateProfileRequest(body: {
   fullName?: string;
   organization?: string;
