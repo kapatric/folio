@@ -154,8 +154,9 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
 
       <p className="auth-footnote">
         Customer details are encrypted at rest with AES-256-GCM. Passwords are
-        hashed with scrypt and never stored in plaintext.{" "}
-        <Link href="/">Back to Folio</Link>
+        hashed with scrypt and never stored in plaintext. If login fails on a
+        fresh machine, create an account here or run{" "}
+        <code>npm run seed:account</code>. <Link href="/">Back to Folio</Link>
       </p>
     </div>
   );

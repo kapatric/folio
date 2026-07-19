@@ -14,6 +14,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "seed:account": "node scripts/seed-account.mjs",
     "postinstall": "node scripts/ensure-lightningcss.js && node scripts/ensure-env.js",
     "clean": "rm -rf .next node_modules",
     "reinstall": "npm run clean && npm install"

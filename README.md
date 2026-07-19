@@ -26,6 +26,23 @@ npm run setup
 
 Then restart the dev server. Do not commit `.env.local`.
 
+### Troubleshooting: `Invalid email or password`
+
+Accounts live in local `.data/customers.json` (not in git). A cloud-created account will not exist on your laptop until you seed or register locally:
+
+```bash
+npm run setup
+npm run seed:account
+npm run dev
+```
+
+Default seeded login:
+
+- Email: `iampatrickhris@gmail.com`
+- Password: `FolioTest2026!`
+
+Override with `SEED_EMAIL`, `SEED_PHONE`, `SEED_PASSWORD`, or `SEED_NAME` if needed.
+
 ### Troubleshooting: `lightningcss.darwin-arm64.node`
 
 If `npm run dev` fails with `Cannot find module '../lightningcss.darwin-arm64.node'`, your `node_modules` is missing the Apple Silicon native binding (often after installing on another machine or skipping optional deps). Reinstall locally:
