@@ -76,11 +76,13 @@ Optional overrides:
 ### Secure document backend (signed-in only)
 
 - Document upload lives on `/account#tokenize` after login (not on the public home page)
+- Frontend talks to the Next.js API through `src/lib/api/client.ts` (session cookies, same-origin)
 - `POST /api/upload` requires a session; encrypts and stores files under `.data/documents/`
 - Supported types: copyright certificate, contract, identity, supporting, other
 - Accepted files: PDF, PNG, JPEG, WebP, TXT, DOC, DOCX (max 12 MB)
 - Filenames and file bytes are encrypted at rest; SHA-256 content hash kept for integrity
 - List via `GET /api/documents`, download via `GET /api/documents/:id` (owner session only)
+- After upload, the account vault list refreshes; connecting a wallet can sync the address to your encrypted profile
 
 ## Smart contract (Base)
 
