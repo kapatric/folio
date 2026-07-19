@@ -39,7 +39,8 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
       if (!response.ok) {
         throw new Error(data.error || "Request failed.");
       }
-      router.push("/account");
+      // Land on the account home after login/register (replace so Back skips the form).
+      router.replace("/account");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");

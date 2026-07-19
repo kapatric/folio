@@ -19,6 +19,7 @@ const NAV_LINKS: MenuLink[] = [
   { href: "/", label: "Home" },
   { href: "/about", label: "About" },
   { href: "/#tokenize", label: "Tokenize" },
+  { href: "/account", label: "Account" },
   { href: "/login", label: "Sign in" },
 ];
 
@@ -80,6 +81,7 @@ export function HamburgerMenu() {
 
   const links = NAV_LINKS.filter((link) => {
     if (link.href === "/login" && customer) return false;
+    if (link.href === "/account" && !customer) return false;
     return true;
   });
 
@@ -117,26 +119,15 @@ export function HamburgerMenu() {
               </li>
             ))}
             {customer && (
-              <>
-                <li>
-                  <Link
-                    href="/account"
-                    className="hamburger-link"
-                    onClick={() => setOpen(false)}
-                  >
-                    Account
-                  </Link>
-                </li>
-                <li>
-                  <button
-                    type="button"
-                    className="hamburger-link hamburger-action"
-                    onClick={() => void onLogout()}
-                  >
-                    Sign out
-                  </button>
-                </li>
-              </>
+              <li>
+                <button
+                  type="button"
+                  className="hamburger-link hamburger-action"
+                  onClick={() => void onLogout()}
+                >
+                  Sign out
+                </button>
+              </li>
             )}
           </ul>
         </nav>
