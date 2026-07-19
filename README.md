@@ -58,7 +58,8 @@ npm run dev
 
 Optional overrides:
 
-- `NEXT_PUBLIC_WC_PROJECT_ID` — WalletConnect (MetaMask/Coinbase work without it)
+- `NEXT_PUBLIC_WC_PROJECT_ID` — WalletConnect Cloud project id (enables Rainbow, Trust, Ledger, OKX, etc. via QR). MetaMask, Coinbase Wallet, and injected browser wallets work without it.
+- `NEXT_PUBLIC_APP_URL` — optional app URL used in wallet connection metadata
 - `NEXT_PUBLIC_FOLIO_IP_ADDRESS` — deployed `FolioIP` contract on Base or Base Sepolia
 - `CUSTOMER_DATA_KEY` — AES-256-GCM customer profile key (auto-generated if empty)
 - `SESSION_SECRET` — signed login cookie secret (auto-generated if empty)

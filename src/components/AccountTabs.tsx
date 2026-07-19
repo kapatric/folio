@@ -122,7 +122,8 @@ export function AccountTabs({
               <div className="section-copy">
                 <h2 id="wallet-heading">Linked wallet</h2>
                 <p>
-                  Connect a wallet to save the address on your encrypted Folio
+                  Link MetaMask, Coinbase Wallet, WalletConnect, or another
+                  browser wallet to save the address on your encrypted Folio
                   profile.
                 </p>
               </div>
