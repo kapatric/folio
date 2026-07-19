@@ -7,11 +7,25 @@ import { loginRequest, registerRequest } from "@/lib/api/client";
 
 type Mode = "login" | "register";
 
-export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
+type AuthFormProps = {
+  initialMode?: Mode;
+  /** Show a confirmation after the sign-out workflow completes. */
+  signedOut?: boolean;
+};
+
+export function AuthForm({
+  initialMode = "login",
+  signedOut = false,
+}: AuthFormProps) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>(initialMode);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [notice, setNotice] = useState<string | null>(
+    signedOut
+      ? "You signed out of Folio. Your session cookie was cleared."
+      : null,
+  );
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -66,11 +80,18 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
           onClick={() => {
             setMode("register");
             setError(null);
+            setNotice(null);
           }}
         >
           Create account
         </button>
       </div>
+
+      {notice && (
+        <p className="field-success auth-signed-out" role="status">
+          {notice}
+        </p>
+      )}
 
       <form className="auth-form" onSubmit={onSubmit}>
         {mode === "register" && (

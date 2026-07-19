@@ -8,14 +8,22 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Sign in — Folio",
-  description: "Create or access your Folio account. Customer data is encrypted at rest.",
+  description:
+    "Create or access your Folio account. Customer data is encrypted at rest.",
 };
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ signedOut?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const customer = await getSessionCustomer().catch(() => null);
   if (customer) {
     redirect("/account");
   }
+
+  const params = await searchParams;
+  const signedOut = params.signedOut === "1";
 
   return (
     <div className="page-shell">
@@ -31,13 +39,14 @@ export default async function LoginPage() {
       <main className="auth-hero">
         <div className="auth-hero-copy">
           <p className="brand-hero">Folio</p>
-          <h1>Your identity, sealed.</h1>
+          <h1>{signedOut ? "Signed out." : "Your identity, sealed."}</h1>
           <p className="hero-lede">
-            Sign in to manage IP tokenization. Customer details are encrypted
-            before they touch disk.
+            {signedOut
+              ? "Your Folio session is cleared. Sign in again when you want to manage documents or your encrypted profile."
+              : "Sign in to manage IP tokenization. Customer details are encrypted before they touch disk."}
           </p>
         </div>
-        <AuthForm />
+        <AuthForm signedOut={signedOut} />
       </main>
     </div>
   );
