@@ -5,7 +5,15 @@ import { CertificateUpload } from "@/components/CertificateUpload";
 import { DocumentList } from "@/components/DocumentList";
 import { WalletConnect } from "@/components/WalletConnect";
 
-export function DocumentsWorkspace() {
+type DocumentsWorkspaceProps = {
+  savedWalletAddress?: string;
+  onWalletSynced?: () => void;
+};
+
+export function DocumentsWorkspace({
+  savedWalletAddress = "",
+  onWalletSynced,
+}: DocumentsWorkspaceProps) {
   const [vaultVersion, setVaultVersion] = useState(0);
 
   const onUploaded = useCallback(() => {
@@ -22,12 +30,16 @@ export function DocumentsWorkspace() {
         <div className="section-copy">
           <h2 id="workflow-heading">Upload</h2>
           <p>
-            Add documents to your encrypted Folio vault. Link a wallet when you
-            are ready to mint.
+            Add documents to your encrypted Folio vault. Link or relink a wallet
+            when you are ready to mint.
           </p>
         </div>
         <div className="account-wallet">
-          <WalletConnect syncProfile />
+          <WalletConnect
+            syncProfile
+            savedWalletAddress={savedWalletAddress}
+            onProfileSynced={onWalletSynced}
+          />
         </div>
         <CertificateUpload onUploaded={onUploaded} />
       </section>

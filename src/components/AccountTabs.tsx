@@ -122,14 +122,15 @@ export function AccountTabs({
               <div className="section-copy">
                 <h2 id="wallet-heading">Linked wallet</h2>
                 <p>
-                  Link MetaMask, Coinbase Wallet, WalletConnect, or another
-                  browser wallet to save the address on your encrypted Folio
-                  profile.
+                  Link or relink MetaMask, Coinbase Wallet, WalletConnect, or
+                  another browser wallet to save the address on your encrypted
+                  Folio profile.
                 </p>
               </div>
               <div className="account-wallet">
                 <WalletConnect
                   syncProfile
+                  savedWalletAddress={profile.walletAddress}
                   onProfileSynced={onWalletSynced}
                 />
               </div>
@@ -145,7 +146,12 @@ export function AccountTabs({
         hidden={activeTab !== "documents"}
         className="account-tabpanel"
       >
-        {activeTab === "documents" && <DocumentsWorkspace />}
+        {activeTab === "documents" && (
+          <DocumentsWorkspace
+            savedWalletAddress={profile.walletAddress}
+            onWalletSynced={onWalletSynced}
+          />
+        )}
       </div>
     </div>
   );

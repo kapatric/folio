@@ -24,6 +24,10 @@ function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
 }
 
+function normalizeAddress(address: string | null | undefined) {
+  return address?.trim().toLowerCase() || "";
+}
+
 function useIsClient() {
   return useSyncExternalStore(
     () => () => {},
@@ -111,14 +115,17 @@ type WalletConnectProps = {
   /** When true, push the connected address into the Folio profile API. */
   syncProfile?: boolean;
   onProfileSynced?: () => void;
-  /** Primary button label. */
+  /** Address already saved on the Folio profile (enables Relink). */
+  savedWalletAddress?: string;
+  /** Override the disconnected-state button label. */
   label?: string;
 };
 
 export function WalletConnect({
   syncProfile = false,
   onProfileSynced,
-  label = "Link wallet",
+  savedWalletAddress = "",
+  label,
 }: WalletConnectProps) {
   const isClient = useIsClient();
   const menuId = useId();
@@ -130,8 +137,14 @@ export function WalletConnect({
   const { switchChain } = useSwitchChain();
   const [menuOpen, setMenuOpen] = useState(false);
   const [pendingId, setPendingId] = useState<string | null>(null);
+  const [unlinking, setUnlinking] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const lastSynced = useRef<string | null>(null);
+
+  const saved = normalizeAddress(savedWalletAddress);
+  const canRelink = Boolean(saved) && !(isConnected && address);
+  const actionLabel =
+    label || (canRelink ? "Relink wallet" : "Link wallet");
 
   const walletOptions = useMemo(
     () => buildWalletOptions(connectors),
@@ -147,7 +160,11 @@ export function WalletConnect({
       .then(() => {
         if (cancelled) return;
         lastSynced.current = address.toLowerCase();
-        setSyncMessage("Wallet linked to your encrypted profile.");
+        setSyncMessage(
+          saved && saved !== address.toLowerCase()
+            ? "Wallet relinked on your encrypted profile."
+            : "Wallet linked to your encrypted profile.",
+        );
         onProfileSynced?.();
       })
       .catch(() => {
@@ -159,7 +176,7 @@ export function WalletConnect({
     return () => {
       cancelled = true;
     };
-  }, [syncProfile, isConnected, address, onProfileSynced]);
+  }, [syncProfile, isConnected, address, onProfileSynced, saved]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -182,10 +199,33 @@ export function WalletConnect({
     };
   }, [menuOpen]);
 
+  async function unlinkWallet() {
+    setUnlinking(true);
+    setSyncMessage(null);
+    lastSynced.current = null;
+
+    try {
+      if (syncProfile) {
+        await updateProfileRequest({ walletAddress: "" });
+        onProfileSynced?.();
+      }
+    } catch {
+      setSyncMessage("Disconnected wallet. Profile unlink skipped.");
+    }
+
+    try {
+      disconnect();
+    } catch {
+      // Best-effort browser disconnect.
+    } finally {
+      setUnlinking(false);
+    }
+  }
+
   if (!isClient) {
     return (
       <button type="button" className="cta-primary" disabled>
-        {label}
+        {actionLabel}
       </button>
     );
   }
@@ -197,6 +237,7 @@ export function WalletConnect({
         : chainId === base.id
           ? "Base"
           : `Chain ${chainId}`;
+    const matchesSaved = !saved || saved === address.toLowerCase();
 
     return (
       <div className="wallet-connected">
@@ -205,6 +246,13 @@ export function WalletConnect({
           <span className="wallet-address">{shortenAddress(address)}</span>
           <span className="wallet-chain">{chainLabel}</span>
         </div>
+        {!matchesSaved && (
+          <p className="upload-hint">
+            Connected address differs from the saved profile wallet{" "}
+            {shortenAddress(savedWalletAddress)}. Syncing updates your Folio
+            profile.
+          </p>
+        )}
         <div className="wallet-actions">
           {chainId !== baseSepolia.id && chainId !== base.id && (
             <button
@@ -218,13 +266,10 @@ export function WalletConnect({
           <button
             type="button"
             className="cta-ghost"
-            onClick={() => {
-              lastSynced.current = null;
-              setSyncMessage(null);
-              disconnect();
-            }}
+            disabled={unlinking}
+            onClick={() => void unlinkWallet()}
           >
-            Unlink wallet
+            {unlinking ? "Unlinking…" : "Unlink wallet"}
           </button>
         </div>
         {syncMessage && <p className="upload-hint">{syncMessage}</p>}
@@ -234,6 +279,12 @@ export function WalletConnect({
 
   return (
     <div className="wallet-connect" ref={rootRef}>
+      {canRelink && (
+        <p className="wallet-relink-hint">
+          Previously linked {shortenAddress(savedWalletAddress)}. Relink to
+          reconnect that wallet (or choose another).
+        </p>
+      )}
       <button
         type="button"
         className="cta-primary"
@@ -246,7 +297,7 @@ export function WalletConnect({
           setMenuOpen((open) => !open);
         }}
       >
-        {isPending || isConnecting ? "Connecting…" : label}
+        {isPending || isConnecting ? "Connecting…" : actionLabel}
       </button>
 
       {menuOpen && (
@@ -300,6 +351,9 @@ export function WalletConnect({
         <p className="field-error" role="alert">
           {error.message}
         </p>
+      )}
+      {syncMessage && !isConnected && (
+        <p className="upload-hint">{syncMessage}</p>
       )}
     </div>
   );
