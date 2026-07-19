@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AccountNav } from "@/components/AccountNav";
 
 type AccountWelcomeProps = {
   fullName: string;
@@ -9,19 +10,32 @@ export function AccountWelcome({ fullName, email }: AccountWelcomeProps) {
   const firstName = fullName.trim().split(/\s+/)[0] || "there";
 
   return (
-    <section className="account-welcome" aria-labelledby="account-welcome-heading">
+    <section
+      className="account-welcome"
+      aria-labelledby="account-welcome-heading"
+    >
       <p className="brand-hero account-brand">Folio</p>
       <h1 id="account-welcome-heading">Welcome back, {firstName}.</h1>
       <p className="hero-lede account-welcome-lede">
-        You’re signed in as {email}. Use your private workspace to upload
-        documents, review the vault, and tokenize IP on Base.
+        You’re signed in as {email}. Open your account information or review
+        uploaded documents in your encrypted vault.
       </p>
-      <div className="account-welcome-actions">
-        <Link href="/account#tokenize" className="cta-primary">
-          Go to document upload
+
+      <AccountNav />
+
+      <div className="account-hub-links" aria-label="Account destinations">
+        <Link href="/account/profile" className="account-hub-link">
+          <span className="account-hub-link-title">Account information</span>
+          <span className="account-hub-link-copy">
+            Update your encrypted profile, contact details, and linked wallet.
+          </span>
         </Link>
-        <Link href="/about" className="cta-secondary">
-          About Folio
+        <Link href="/account/documents" className="account-hub-link">
+          <span className="account-hub-link-title">Uploaded documents</span>
+          <span className="account-hub-link-copy">
+            Upload files to the vault, download existing documents, and prepare
+            minting.
+          </span>
         </Link>
       </div>
     </section>

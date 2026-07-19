@@ -47,8 +47,8 @@ export default function AboutPage() {
           <Link href="/login" className="cta-primary">
             Sign in to upload
           </Link>
-          <Link href="/account#tokenize" className="cta-secondary">
-            Open document workflow
+          <Link href="/account/documents" className="cta-secondary">
+            Open uploaded documents
           </Link>
         </div>
       </main>
