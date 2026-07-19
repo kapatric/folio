@@ -1,11 +1,11 @@
 import { http, createConfig, createStorage, cookieStorage } from "wagmi";
 import { base, baseSepolia } from "wagmi/chains";
-import {
-  coinbaseWallet,
-  injected,
-  metaMask,
-  walletConnect,
-} from "@wagmi/connectors";
+// Import connector entrypoints directly so Turbopack/Webpack do not pull in
+// unused optional peers from the @wagmi/connectors barrel (porto, safe, etc.).
+import { coinbaseWallet } from "@wagmi/connectors/coinbaseWallet";
+import { injected } from "@wagmi/connectors/injected";
+import { metaMask } from "@wagmi/connectors/metaMask";
+import { walletConnect } from "@wagmi/connectors/walletConnect";
 
 const walletConnectProjectId =
   process.env.NEXT_PUBLIC_WC_PROJECT_ID?.trim() || "";

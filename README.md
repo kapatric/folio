@@ -43,6 +43,22 @@ Default seeded login:
 
 Override with `SEED_EMAIL`, `SEED_PHONE`, `SEED_PASSWORD`, or `SEED_NAME` if needed.
 
+### Troubleshooting: `Cannot find module '@coinbase/wallet-sdk'`
+
+Wagmi v3 expects wallet connector SDKs as peer dependencies. Folio lists them in `package.json`, but a stale or partial `node_modules` can still miss them. Reinstall:
+
+```bash
+npm install @coinbase/wallet-sdk @metamask/connect-evm @walletconnect/ethereum-provider
+npm run dev
+```
+
+Or:
+
+```bash
+npm run reinstall
+npm run dev
+```
+
 ### Troubleshooting: `lightningcss.darwin-arm64.node`
 
 If `npm run dev` fails with `Cannot find module '../lightningcss.darwin-arm64.node'`, your `node_modules` is missing the Apple Silicon native binding (often after installing on another machine or skipping optional deps). Reinstall locally:
