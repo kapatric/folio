@@ -159,6 +159,75 @@ export async function authenticateCustomer(
     customer.passwordHash,
   );
   if (!valid) return null;
+  try {
+    return toPublic(customer);
+  } catch {
+    throw new Error(
+      "Account data could not be decrypted. Your .env.local secrets may have changed. Run `npm run seed:account` to recreate the test account.",
+    );
+  }
+}
+
+/** Create or reset a local account (used by seed script / recovery). */
+export async function upsertCustomer(input: {
+  email: string;
+  password: string;
+  fullName: string;
+  organization?: string;
+  phone?: string;
+  walletAddress?: string;
+}): Promise<PublicCustomer> {
+  const email = normalizeEmail(input.email);
+  if (!email || !email.includes("@")) {
+    throw new Error("A valid email is required.");
+  }
+  if (input.password.length < 8) {
+    throw new Error("Password must be at least 8 characters.");
+  }
+  if (!input.fullName.trim()) {
+    throw new Error("Full name is required.");
+  }
+
+  const now = new Date().toISOString();
+  const { salt, hash } = hashPassword(input.password);
+  const profile: CustomerProfile = {
+    email,
+    fullName: input.fullName.trim(),
+    organization: input.organization?.trim() || "",
+    phone: input.phone?.trim() || "",
+    walletAddress: input.walletAddress?.trim() || "",
+  };
+
+  const db = await ensureDb();
+  const index = emailIndex(email);
+  const existingIndex = db.customers.findIndex(
+    (customer) => customer.emailIndex === index,
+  );
+
+  if (existingIndex >= 0) {
+    const existing = db.customers[existingIndex];
+    db.customers[existingIndex] = {
+      ...existing,
+      passwordSalt: salt,
+      passwordHash: hash,
+      encryptedProfile: encryptProfile(profile),
+      updatedAt: now,
+    };
+    await saveDb(db);
+    return toPublic(db.customers[existingIndex]);
+  }
+
+  const customer: StoredCustomer = {
+    id: randomUUID(),
+    emailIndex: index,
+    passwordSalt: salt,
+    passwordHash: hash,
+    encryptedProfile: encryptProfile(profile),
+    createdAt: now,
+    updatedAt: now,
+  };
+  db.customers.push(customer);
+  await saveDb(db);
   return toPublic(customer);
 }
 
