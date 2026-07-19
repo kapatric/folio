@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
-import { logoutRequest, meRequest } from "@/lib/api/client";
+import { meRequest } from "@/lib/api/client";
 
 type CustomerSummary = {
   id: string;
@@ -22,6 +22,7 @@ const NAV_LINKS: MenuLink[] = [
   { href: "/account", label: "Account" },
   { href: "/account/profile", label: "Account information" },
   { href: "/account/documents", label: "Uploaded documents" },
+  { href: "/sign-out", label: "Sign out" },
   { href: "/login", label: "Sign in" },
 ];
 
@@ -31,7 +32,6 @@ type HamburgerMenuProps = {
 
 export function HamburgerMenu({ onOpenChange }: HamburgerMenuProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
@@ -83,20 +83,9 @@ export function HamburgerMenu({ onOpenChange }: HamburgerMenuProps) {
     };
   }, [open]);
 
-  async function onLogout() {
-    try {
-      await logoutRequest();
-    } catch {
-      // Still clear local session UI if the API call fails.
-    }
-    setCustomer(null);
-    setOpen(false);
-    router.push("/login");
-    router.refresh();
-  }
-
   const links = NAV_LINKS.filter((link) => {
     if (link.href === "/login" && customer) return false;
+    if (link.href === "/sign-out" && !customer) return false;
     if (link.href.startsWith("/account") && !customer) return false;
     return true;
   });
@@ -134,17 +123,6 @@ export function HamburgerMenu({ onOpenChange }: HamburgerMenuProps) {
                 </Link>
               </li>
             ))}
-            {customer && (
-              <li>
-                <button
-                  type="button"
-                  className="hamburger-link hamburger-action"
-                  onClick={() => void onLogout()}
-                >
-                  Sign out
-                </button>
-              </li>
-            )}
           </ul>
         </nav>
       )}

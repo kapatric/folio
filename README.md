@@ -88,6 +88,7 @@ Optional overrides:
 ### Login & encrypted customer data
 
 - `/login` — create an account or sign in (redirects to `/account` after success)
+- `/sign-out` — end the session (also available from account **Sign out** and the menu)
 - `/forgot-password` — request a one-hour password recovery link
 - `/reset-password?token=…` — choose a new password and sign back in
 - `/account` — redirects into the account tabs (Account information by default)
@@ -96,6 +97,12 @@ Optional overrides:
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob
+
+### Sign out
+
+1. From `/account` click **Sign out**, or choose **Sign out** in the menu, or visit `/sign-out`
+2. Confirm when prompted (account button)
+3. Folio clears the `folio_session` cookie via `POST /api/auth/logout`, disconnects a linked wallet when connected, and sends you to `/login?signedOut=1`
 
 ### Password recovery
 

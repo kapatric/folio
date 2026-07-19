@@ -5,5 +5,12 @@ export const runtime = "nodejs";
 
 export async function POST() {
   await clearSessionCookie();
-  return NextResponse.json({ ok: true });
+  return NextResponse.json(
+    { ok: true, signedOut: true },
+    {
+      headers: {
+        "Cache-Control": "no-store",
+      },
+    },
+  );
 }
