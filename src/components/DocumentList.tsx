@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { listDocumentsRequest } from "@/lib/api/client";
 import {
   DOCUMENT_TYPE_LABELS,
   type DocumentType,
@@ -13,43 +14,40 @@ function formatBytes(bytes: number) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-export function DocumentList() {
+export function DocumentList({ refreshKey = 0 }: { refreshKey?: number }) {
   const [documents, setDocuments] = useState<PublicDocument[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/documents", { credentials: "same-origin" })
-      .then(async (response) => {
-        const data = (await response.json()) as {
-          documents?: PublicDocument[];
-          error?: string;
-        };
-        if (!response.ok) {
-          throw new Error(data.error || "Unable to load documents.");
-        }
-        if (!cancelled) setDocuments(data.documents || []);
+
+    void listDocumentsRequest()
+      .then((data) => {
+        if (cancelled) return;
+        setDocuments(data.documents || []);
+        setError(null);
+        setLoaded(true);
       })
       .catch((err: unknown) => {
-        if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Unable to load documents.");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoaded(true);
+        if (cancelled) return;
+        setError(
+          err instanceof Error ? err.message : "Unable to load documents.",
+        );
+        setLoaded(true);
       });
+
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [refreshKey]);
 
   if (!loaded) {
     return (
       <section className="document-list" aria-labelledby="docs-heading">
         <div className="section-copy">
           <h2 id="docs-heading">Your documents</h2>
-          <p>Loading encrypted vault…</p>
+          <p>Loading your encrypted vault…</p>
         </div>
       </section>
     );
@@ -60,8 +58,7 @@ export function DocumentList() {
       <div className="section-copy">
         <h2 id="docs-heading">Your documents</h2>
         <p>
-          Files you uploaded while signed in. Stored encrypted; download
-          decrypts only for your session.
+          Downloads decrypt only for your signed-in session.
         </p>
       </div>
 
@@ -72,7 +69,9 @@ export function DocumentList() {
       )}
 
       {!error && documents.length === 0 && (
-        <p className="upload-hint">No documents yet. Upload from the home page.</p>
+        <p className="upload-hint">
+          No documents yet. Upload above in the document workflow.
+        </p>
       )}
 
       {documents.length > 0 && (

@@ -10,6 +10,7 @@ import {
 import { useAccount } from "wagmi";
 import { keccak256 } from "viem";
 import { MintIP } from "@/components/MintIP";
+import { uploadDocumentRequest } from "@/lib/api/client";
 import {
   ACCEPTED_EXTENSIONS,
   DOCUMENT_TYPE_LABELS,
@@ -30,7 +31,6 @@ const ACCEPTED_TYPES = [
 
 type UploadState =
   | { status: "idle" }
-  | { status: "selected"; file: File }
   | { status: "uploading"; file: File; progress: number }
   | {
       status: "success";
@@ -40,7 +40,6 @@ type UploadState =
       size: number;
       contentHash: `0x${string}`;
       documentType: DocumentType;
-      linkedToAccount: boolean;
     }
   | { status: "error"; message: string; file?: File };
 
@@ -61,13 +60,10 @@ function validateFile(file: File): string | null {
 }
 
 type CertificateUploadProps = {
-  /** When true, page is already behind login; uploads always attach to the session. */
-  requireSession?: boolean;
+  onUploaded?: () => void;
 };
 
-export function CertificateUpload({
-  requireSession = false,
-}: CertificateUploadProps) {
+export function CertificateUpload({ onUploaded }: CertificateUploadProps) {
   const inputId = useId();
   const typeId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -78,21 +74,11 @@ export function CertificateUpload({
   const [dragging, setDragging] = useState(false);
 
   const needsWalletForMint = documentType === "copyright_certificate";
-  const canUpload = requireSession || isConnected;
 
   async function uploadFile(file: File) {
     const validationError = validateFile(file);
     if (validationError) {
       setState({ status: "error", message: validationError, file });
-      return;
-    }
-
-    if (!requireSession && (!isConnected || !address)) {
-      setState({
-        status: "error",
-        message: "Connect your wallet before uploading a document.",
-        file,
-      });
       return;
     }
 
@@ -111,25 +97,8 @@ export function CertificateUpload({
       const contentHash = keccak256(new Uint8Array(buffer));
 
       setState({ status: "uploading", file, progress: 55 });
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-        credentials: "same-origin",
-      });
+      const payload = await uploadDocumentRequest(formData);
       setState({ status: "uploading", file, progress: 88 });
-
-      const payload = (await response.json()) as {
-        error?: string;
-        certificateId?: string;
-        originalName?: string;
-        size?: number;
-        linkedToAccount?: boolean;
-        documentType?: DocumentType;
-      };
-
-      if (!response.ok || !payload.certificateId) {
-        throw new Error(payload.error || "Upload failed. Try again.");
-      }
 
       setState({
         status: "success",
@@ -138,9 +107,9 @@ export function CertificateUpload({
         originalName: payload.originalName || file.name,
         size: payload.size || file.size,
         contentHash,
-        documentType: payload.documentType || documentType,
-        linkedToAccount: Boolean(payload.linkedToAccount),
+        documentType: (payload.documentType as DocumentType) || documentType,
       });
+      onUploaded?.();
     } catch (error) {
       setState({
         status: "error",
@@ -165,24 +134,22 @@ export function CertificateUpload({
   function onDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDragging(false);
-    if (!canUpload) return;
     onFileChosen(event.dataTransfer.files?.[0]);
   }
 
   const selectedFile =
-    state.status === "idle" || state.status === "error"
-      ? state.status === "error"
-        ? state.file
-        : undefined
-      : state.file;
+    state.status === "error" ? state.file : undefined;
 
   return (
-    <section className="upload-section account-upload" aria-labelledby="upload-heading">
+    <section
+      className="upload-section account-upload"
+      aria-labelledby="upload-heading"
+    >
       <div className="section-copy">
         <h2 id="upload-heading">Upload documents</h2>
         <p>
-          Store certificates and supporting files in your encrypted vault.
-          Copyright certificates can be minted once a wallet is connected.
+          Files are encrypted at rest and linked to your signed-in Folio
+          account.
         </p>
       </div>
 
@@ -205,12 +172,10 @@ export function CertificateUpload({
       </label>
 
       <div
-        className={`upload-dropzone${dragging ? " is-dragging" : ""}${
-          !canUpload ? " is-disabled" : ""
-        }`}
+        className={`upload-dropzone${dragging ? " is-dragging" : ""}`}
         onDragEnter={(event) => {
           event.preventDefault();
-          if (canUpload) setDragging(true);
+          setDragging(true);
         }}
         onDragOver={(event) => {
           event.preventDefault();
@@ -224,7 +189,7 @@ export function CertificateUpload({
           type="file"
           className="sr-only"
           accept={ACCEPTED_EXTENSIONS}
-          disabled={!canUpload || state.status === "uploading"}
+          disabled={state.status === "uploading"}
           onChange={onInputChange}
         />
 
@@ -281,17 +246,13 @@ export function CertificateUpload({
           </div>
         ) : (
           <>
-            <p className="upload-prompt">
-              Drag & drop a document, or browse
-            </p>
+            <p className="upload-prompt">Drag & drop a document, or browse</p>
             <p className="upload-hint">
-              PDF, PNG, JPEG, WebP, TXT, DOC, DOCX · up to 12 MB · encrypted at
-              rest
+              PDF, PNG, JPEG, WebP, TXT, DOC, DOCX · up to 12 MB
             </p>
             <button
               type="button"
               className="cta-secondary"
-              disabled={!canUpload}
               onClick={() => inputRef.current?.click()}
             >
               Choose file

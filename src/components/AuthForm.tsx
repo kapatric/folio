@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
+import { loginRequest, registerRequest } from "@/lib/api/client";
 
 type Mode = "login" | "register";
 
@@ -18,28 +19,21 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
     setPending(true);
 
     const form = new FormData(event.currentTarget);
-    const payload = {
-      email: String(form.get("email") || ""),
-      password: String(form.get("password") || ""),
-      fullName: String(form.get("fullName") || ""),
-      organization: String(form.get("organization") || ""),
-      phone: String(form.get("phone") || ""),
-    };
+    const email = String(form.get("email") || "");
+    const password = String(form.get("password") || "");
 
     try {
-      const response = await fetch(
-        mode === "login" ? "/api/auth/login" : "/api/auth/register",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        },
-      );
-      const data = (await response.json()) as { error?: string };
-      if (!response.ok) {
-        throw new Error(data.error || "Request failed.");
+      if (mode === "login") {
+        await loginRequest({ email, password });
+      } else {
+        await registerRequest({
+          email,
+          password,
+          fullName: String(form.get("fullName") || ""),
+          organization: String(form.get("organization") || ""),
+          phone: String(form.get("phone") || ""),
+        });
       }
-      // Land on the account home after login/register (replace so Back skips the form).
       router.replace("/account");
       router.refresh();
     } catch (err) {
@@ -153,9 +147,7 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
       </form>
 
       <p className="auth-footnote">
-        Customer details are encrypted at rest with AES-256-GCM. Passwords are
-        hashed with scrypt and never stored in plaintext. If login fails on a
-        fresh machine, create an account here or run{" "}
+        If sign-in fails on a fresh machine, run{" "}
         <code>npm run seed:account</code>. <Link href="/">Back to Folio</Link>
       </p>
     </div>

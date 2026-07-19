@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState } from "react";
+import { logoutRequest, meRequest } from "@/lib/api/client";
 
 type CustomerSummary = {
   id: string;
@@ -33,13 +34,8 @@ export function HamburgerMenu() {
 
   useEffect(() => {
     let cancelled = false;
-    void fetch("/api/auth/me")
-      .then(async (response) => {
-        if (!response.ok) {
-          if (!cancelled) setCustomer(null);
-          return;
-        }
-        const data = (await response.json()) as { customer: CustomerSummary };
+    void meRequest()
+      .then((data) => {
         if (!cancelled) setCustomer(data.customer);
       })
       .catch(() => {
@@ -72,7 +68,11 @@ export function HamburgerMenu() {
   }, [open]);
 
   async function onLogout() {
-    await fetch("/api/auth/logout", { method: "POST" });
+    try {
+      await logoutRequest();
+    } catch {
+      // Still clear local session UI if the API call fails.
+    }
     setCustomer(null);
     setOpen(false);
     router.push("/login");

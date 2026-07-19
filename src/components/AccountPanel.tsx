@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { updateProfileRequest } from "@/lib/api/client";
 
 export type AccountCustomer = {
   id: string;
@@ -14,8 +14,12 @@ export type AccountCustomer = {
   updatedAt: string;
 };
 
-export function AccountPanel({ customer }: { customer: AccountCustomer }) {
-  const router = useRouter();
+type AccountPanelProps = {
+  customer: AccountCustomer;
+  onUpdated?: (customer: AccountCustomer) => void;
+};
+
+export function AccountPanel({ customer, onUpdated }: AccountPanelProps) {
   const [form, setForm] = useState({
     fullName: customer.fullName,
     organization: customer.organization,
@@ -33,26 +37,15 @@ export function AccountPanel({ customer }: { customer: AccountCustomer }) {
     setMessage(null);
 
     try {
-      const response = await fetch("/api/auth/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const data = (await response.json()) as {
-        error?: string;
-        customer?: AccountCustomer;
-      };
-      if (!response.ok || !data.customer) {
-        throw new Error(data.error || "Update failed.");
-      }
+      const data = await updateProfileRequest(form);
       setForm({
         fullName: data.customer.fullName,
         organization: data.customer.organization,
         phone: data.customer.phone,
         walletAddress: data.customer.walletAddress,
       });
-      setMessage("Encrypted profile updated.");
-      router.refresh();
+      setMessage("Encrypted profile saved.");
+      onUpdated?.(data.customer);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Update failed.");
     } finally {
@@ -65,8 +58,8 @@ export function AccountPanel({ customer }: { customer: AccountCustomer }) {
       <div className="section-copy">
         <h2 id="account-heading">Your encrypted profile</h2>
         <p>
-          Folio decrypts this profile only for your signed-in session. At rest,
-          names, contact details, and wallet links are sealed with AES-256-GCM.
+          Names, contact details, and wallet links are sealed with AES-256-GCM
+          at rest.
         </p>
       </div>
 

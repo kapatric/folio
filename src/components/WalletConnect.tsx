@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useState, useSyncExternalStore, useEffect, useRef } from "react";
 import {
   useAccount,
   useConnect,
@@ -9,6 +9,7 @@ import {
   useSwitchChain,
 } from "wagmi";
 import { base, baseSepolia } from "wagmi/chains";
+import { updateProfileRequest } from "@/lib/api/client";
 
 function shortenAddress(address: string) {
   return `${address.slice(0, 6)}…${address.slice(-4)}`;
@@ -22,7 +23,16 @@ function useIsClient() {
   );
 }
 
-export function WalletConnect() {
+type WalletConnectProps = {
+  /** When true, push the connected address into the Folio profile API. */
+  syncProfile?: boolean;
+  onProfileSynced?: () => void;
+};
+
+export function WalletConnect({
+  syncProfile = false,
+  onProfileSynced,
+}: WalletConnectProps) {
   const isClient = useIsClient();
   const { address, isConnected, isConnecting } = useAccount();
   const { connect, connectors, isPending, error } = useConnect();
@@ -30,6 +40,31 @@ export function WalletConnect() {
   const chainId = useChainId();
   const { switchChain } = useSwitchChain();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [syncMessage, setSyncMessage] = useState<string | null>(null);
+  const lastSynced = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!syncProfile || !isConnected || !address) return;
+    if (lastSynced.current === address.toLowerCase()) return;
+
+    let cancelled = false;
+    void updateProfileRequest({ walletAddress: address })
+      .then(() => {
+        if (cancelled) return;
+        lastSynced.current = address.toLowerCase();
+        setSyncMessage("Wallet saved to encrypted profile.");
+        onProfileSynced?.();
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setSyncMessage("Wallet connected. Profile sync skipped.");
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [syncProfile, isConnected, address, onProfileSynced]);
 
   if (!isClient) {
     return (
@@ -67,11 +102,16 @@ export function WalletConnect() {
           <button
             type="button"
             className="cta-ghost"
-            onClick={() => disconnect()}
+            onClick={() => {
+              lastSynced.current = null;
+              setSyncMessage(null);
+              disconnect();
+            }}
           >
             Disconnect
           </button>
         </div>
+        {syncMessage && <p className="upload-hint">{syncMessage}</p>}
       </div>
     );
   }
