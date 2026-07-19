@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
-import { AccountShell } from "@/components/AccountShell";
-import { AccountWelcome } from "@/components/AccountWelcome";
+import { redirect } from "next/navigation";
 import { requireSessionCustomer } from "@/lib/auth/requireCustomer";
 
 export const dynamic = "force-dynamic";
@@ -8,15 +7,11 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Account — Folio",
   description:
-    "Your Folio account hub: open account information or uploaded documents.",
+    "Your Folio account: view and edit account information, or manage uploaded documents.",
 };
 
+/** Hub entry point opens the Account information tab by default. */
 export default async function AccountPage() {
-  const customer = await requireSessionCustomer();
-
-  return (
-    <AccountShell>
-      <AccountWelcome fullName={customer.fullName} email={customer.email} />
-    </AccountShell>
-  );
+  await requireSessionCustomer();
+  redirect("/account/profile");
 }

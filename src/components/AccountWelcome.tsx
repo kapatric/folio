@@ -1,6 +1,3 @@
-import Link from "next/link";
-import { AccountNav } from "@/components/AccountNav";
-
 type AccountWelcomeProps = {
   fullName: string;
   email: string;
@@ -17,27 +14,9 @@ export function AccountWelcome({ fullName, email }: AccountWelcomeProps) {
       <p className="brand-hero account-brand">Folio</p>
       <h1 id="account-welcome-heading">Welcome back, {firstName}.</h1>
       <p className="hero-lede account-welcome-lede">
-        You’re signed in as {email}. Open your account information or review
-        uploaded documents in your encrypted vault.
+        You’re signed in as {email}. Use the tabs below to view and edit your
+        account information, or open uploaded documents.
       </p>
-
-      <AccountNav />
-
-      <div className="account-hub-links" aria-label="Account destinations">
-        <Link href="/account/profile" className="account-hub-link">
-          <span className="account-hub-link-title">Account information</span>
-          <span className="account-hub-link-copy">
-            Update your encrypted profile, contact details, and linked wallet.
-          </span>
-        </Link>
-        <Link href="/account/documents" className="account-hub-link">
-          <span className="account-hub-link-title">Uploaded documents</span>
-          <span className="account-hub-link-copy">
-            Upload files to the vault, download existing documents, and prepare
-            minting.
-          </span>
-        </Link>
-      </div>
     </section>
   );
 }
