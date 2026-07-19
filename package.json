@@ -8,14 +8,14 @@
   },
   "scripts": {
     "setup": "node scripts/ensure-env.js",
-    "predev": "node scripts/ensure-env.js",
-    "prebuild": "node scripts/ensure-env.js",
+    "predev": "node scripts/ensure-env.js && node scripts/ensure-wallet-sdks.js",
+    "prebuild": "node scripts/ensure-env.js && node scripts/ensure-wallet-sdks.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "seed:account": "node scripts/seed-account.mjs",
-    "postinstall": "node scripts/ensure-lightningcss.js && node scripts/ensure-env.js",
+    "postinstall": "node scripts/ensure-lightningcss.js && node scripts/ensure-wallet-sdks.js && node scripts/ensure-env.js",
     "clean": "rm -rf .next node_modules",
     "reinstall": "npm run clean && npm install"
   },
