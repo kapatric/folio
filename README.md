@@ -31,6 +31,7 @@ Copy `.env.example` → `.env.local`:
 - `CUSTOMER_DATA_KEY` — 32-byte hex key for AES-256-GCM customer profile encryption (`openssl rand -hex 32`)
 - `SESSION_SECRET` — secret for signed login cookies (`openssl rand -hex 32`)
 - `EMAIL_INDEX_SECRET` — optional HMAC secret for email lookup (defaults to `CUSTOMER_DATA_KEY`)
+- `DOCUMENT_ENCRYPTION_KEY` — AES-256-GCM key for uploaded documents (falls back to `CUSTOMER_DATA_KEY`)
 
 ### Login & encrypted customer data
 
@@ -39,6 +40,14 @@ Copy `.env.example` → `.env.local`:
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob
+
+### Secure document backend
+
+- Home upload button → `POST /api/upload` encrypts and stores the file under `.data/documents/`
+- Supported types: copyright certificate, contract, identity, supporting, other
+- Accepted files: PDF, PNG, JPEG, WebP, TXT, DOC, DOCX (max 12 MB)
+- Filenames and file bytes are encrypted at rest; SHA-256 content hash kept for integrity
+- Signed-in uploads link to your account → list via `GET /api/documents`, download via `GET /api/documents/:id`
 
 ## Smart contract (Base)
 
@@ -65,4 +74,4 @@ See [`contracts/README.md`](contracts/README.md) for Base mainnet and verificati
 - wagmi + viem (Base / Base Sepolia)
 - Foundry `FolioIP` ERC-721 — unique mint per certificate content hash
 - Encrypted customer accounts (AES-256-GCM + scrypt + signed session cookies)
-- `/api/upload` validates certificate uploads bound to a wallet address
+- Encrypted document vault (`/api/upload`, `/api/documents`) linked to the home upload UI
