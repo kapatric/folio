@@ -35,8 +35,8 @@ Copy `.env.example` → `.env.local`:
 
 ### Login & encrypted customer data
 
-- `/login` — create an account or sign in
-- `/account` — view/update your profile (decrypted only for your session)
+- `/login` — create an account or sign in (redirects to `/account` after success)
+- `/account` — post-login home: welcome, encrypted profile, and documents
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob

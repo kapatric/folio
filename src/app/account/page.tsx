@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AccountPanel } from "@/components/AccountPanel";
+import { AccountWelcome } from "@/components/AccountWelcome";
 import { DocumentList } from "@/components/DocumentList";
 import { SiteHeader } from "@/components/SiteHeader";
 import { getSessionCustomer } from "@/lib/auth/session";
@@ -9,7 +10,8 @@ export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Account — Folio",
-  description: "View and update your encrypted Folio customer profile.",
+  description:
+    "Your Folio account home after sign-in: encrypted profile, documents, and next steps.",
 };
 
 export default async function AccountPage() {
@@ -36,10 +38,17 @@ export default async function AccountPage() {
       <SiteHeader />
 
       <main className="account-main">
-        <p className="brand-hero account-brand">Folio</p>
-        <AccountPanel customer={customer} />
-        <DocumentList />
+        <AccountWelcome fullName={customer.fullName} email={customer.email} />
+
+        <div className="account-panels">
+          <AccountPanel customer={customer} />
+          <DocumentList />
+        </div>
       </main>
+
+      <footer className="site-footer">
+        <p>Folio · Signed-in account</p>
+      </footer>
     </div>
   );
 }
