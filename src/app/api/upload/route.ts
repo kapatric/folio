@@ -6,6 +6,14 @@ export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
+    const customer = await getSessionCustomer().catch(() => null);
+    if (!customer) {
+      return NextResponse.json(
+        { error: "Sign in required to upload documents." },
+        { status: 401 },
+      );
+    }
+
     const formData = await request.formData();
     const file =
       formData.get("document") ??
@@ -23,19 +31,16 @@ export async function POST(request: Request) {
       );
     }
 
-    const customer = await getSessionCustomer().catch(() => null);
-
     const document = await storeDocument({
       file,
       documentType,
       walletAddress: walletAddress || undefined,
-      ownerCustomerId: customer?.id ?? null,
+      ownerCustomerId: customer.id,
     });
 
     return NextResponse.json({
       ok: true,
       document,
-      // Backward-compatible fields for the existing upload UI / mint flow
       certificateId: document.id,
       originalName: document.originalName,
       mimeType: document.mimeType,
@@ -45,7 +50,7 @@ export async function POST(request: Request) {
       documentType: document.documentType,
       receivedAt: document.createdAt,
       storedSecurely: true,
-      linkedToAccount: Boolean(customer),
+      linkedToAccount: true,
     });
   } catch (error) {
     const message =

@@ -51,18 +51,19 @@ Optional overrides:
 ### Login & encrypted customer data
 
 - `/login` — create an account or sign in (redirects to `/account` after success)
-- `/account` — post-login home: welcome, encrypted profile, and documents
+- `/account` — post-login workspace: document upload workflow, vault, and encrypted profile
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob
 
-### Secure document backend
+### Secure document backend (signed-in only)
 
-- Home upload button → `POST /api/upload` encrypts and stores the file under `.data/documents/`
+- Document upload lives on `/account#tokenize` after login (not on the public home page)
+- `POST /api/upload` requires a session; encrypts and stores files under `.data/documents/`
 - Supported types: copyright certificate, contract, identity, supporting, other
 - Accepted files: PDF, PNG, JPEG, WebP, TXT, DOC, DOCX (max 12 MB)
 - Filenames and file bytes are encrypted at rest; SHA-256 content hash kept for integrity
-- Signed-in uploads link to your account → list via `GET /api/documents`, download via `GET /api/documents/:id`
+- List via `GET /api/documents`, download via `GET /api/documents/:id` (owner session only)
 
 ## Smart contract (Base)
 
@@ -89,4 +90,4 @@ See [`contracts/README.md`](contracts/README.md) for Base mainnet and verificati
 - wagmi + viem (Base / Base Sepolia)
 - Foundry `FolioIP` ERC-721 — unique mint per certificate content hash
 - Encrypted customer accounts (AES-256-GCM + scrypt + signed session cookies)
-- Encrypted document vault (`/api/upload`, `/api/documents`) linked to the home upload UI
+- Encrypted document vault (`/api/upload`, `/api/documents`) as a post-login internal workflow

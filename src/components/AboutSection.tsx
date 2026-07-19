@@ -11,13 +11,12 @@ export function AboutSection() {
         </p>
       </div>
       <p className="about-body">
-        Upload a certificate, connect a wallet on Base, and mint an ERC-721 that
-        binds the work to its content hash. Customer profiles stay encrypted at
-        rest—identity and intellectual property travel together without exposing
-        either in the clear.
+        After you sign in, upload a certificate in your private workspace,
+        connect a wallet on Base, and mint an ERC-721 bound to the file’s
+        content hash. Customer profiles and documents stay encrypted at rest.
       </p>
-      <Link href="/about" className="cta-secondary about-link">
-        Read the full story
+      <Link href="/login" className="cta-secondary about-link">
+        Sign in to get started
       </Link>
     </section>
   );

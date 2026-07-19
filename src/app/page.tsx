@@ -1,7 +1,6 @@
+import Link from "next/link";
 import { AboutSection } from "@/components/AboutSection";
-import { CertificateUpload } from "@/components/CertificateUpload";
 import { SiteHeader } from "@/components/SiteHeader";
-import { WalletConnect } from "@/components/WalletConnect";
 
 export default function Home() {
   return (
@@ -20,11 +19,16 @@ export default function Home() {
           <p className="brand-hero">Folio</p>
           <h1>Prove authorship. Tokenize the rights.</h1>
           <p className="hero-lede">
-            Connect a wallet, upload your copyright certificate, and mint it as
-            a unique ERC-721 on Base.
+            Sign in to upload certificates, store supporting documents, and mint
+            unique IP as an ERC-721 on Base.
           </p>
           <div className="hero-cta">
-            <WalletConnect />
+            <Link href="/login" className="cta-primary">
+              Sign in to continue
+            </Link>
+            <Link href="/about" className="cta-secondary">
+              About Folio
+            </Link>
           </div>
         </div>
 
@@ -37,10 +41,6 @@ export default function Home() {
           </div>
         </div>
       </main>
-
-      <div id="tokenize">
-        <CertificateUpload />
-      </div>
 
       <AboutSection />
 
