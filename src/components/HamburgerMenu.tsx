@@ -25,13 +25,28 @@ const NAV_LINKS: MenuLink[] = [
   { href: "/login", label: "Sign in" },
 ];
 
-export function HamburgerMenu() {
+type HamburgerMenuProps = {
+  onOpenChange?: (open: boolean) => void;
+};
+
+export function HamburgerMenu({ onOpenChange }: HamburgerMenuProps) {
   const pathname = usePathname();
   const router = useRouter();
   const menuId = useId();
   const rootRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
+  const [menuPath, setMenuPath] = useState(pathname);
   const [customer, setCustomer] = useState<CustomerSummary | null>(null);
+
+  // Close the sticky dropdown when the route changes; keep it open while scrolling.
+  if (pathname !== menuPath) {
+    setMenuPath(pathname);
+    if (open) setOpen(false);
+  }
+
+  useEffect(() => {
+    onOpenChange?.(open);
+  }, [open, onOpenChange]);
 
   useEffect(() => {
     let cancelled = false;
