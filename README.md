@@ -65,16 +65,32 @@ Optional overrides:
 - `SESSION_SECRET` — signed login cookie secret (auto-generated if empty)
 - `EMAIL_INDEX_SECRET` — optional HMAC secret for email lookup (defaults to `CUSTOMER_DATA_KEY`)
 - `DOCUMENT_ENCRYPTION_KEY` — document vault key (auto-generated if empty; otherwise falls back to `CUSTOMER_DATA_KEY`)
+- `RESEND_API_KEY` — optional; send password-reset emails through [Resend](https://resend.com/)
+- `PASSWORD_RESET_FROM_EMAIL` — optional From address for reset emails
+- `PASSWORD_RESET_REVEAL_URL` — set `true` to include the reset URL in API responses (on by default in development)
 
 ### Login & encrypted customer data
 
 - `/login` — create an account or sign in (redirects to `/account` after success)
+- `/forgot-password` — request a one-hour password recovery link
+- `/reset-password?token=…` — choose a new password and sign back in
 - `/account` — redirects into the account tabs (Account information by default)
 - `/account/profile` — Account information tab: view and edit encrypted customer details
 - `/account/documents` — Uploaded documents tab: upload workflow and vault list
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob
+
+### Password recovery
+
+1. On `/login`, open **Forgot password?**
+2. Submit the account email (`POST /api/auth/forgot-password`)
+3. Open the one-time reset link (expires in 1 hour)
+4. Set a new password on `/reset-password` (`POST /api/auth/reset-password`)
+
+Delivery:
+- With `RESEND_API_KEY`, Folio emails the reset link
+- Without email config, Folio writes the link to `.data/password-reset-outbox.json` and the server log (and reveals it in the UI during local development)
 
 ### Secure document backend (signed-in only)
 

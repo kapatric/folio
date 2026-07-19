@@ -144,6 +144,15 @@ export function AuthForm({ initialMode = "login" }: { initialMode?: Mode }) {
               ? "Sign in"
               : "Create encrypted account"}
         </button>
+
+        {mode === "login" && (
+          <Link
+            href="/forgot-password"
+            className="cta-secondary auth-recovery-button"
+          >
+            Recover password
+          </Link>
+        )}
       </form>
 
       <p className="auth-footnote">
