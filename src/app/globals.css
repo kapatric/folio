@@ -823,13 +823,11 @@ input {
   line-height: 1.5;
 }
 
-.auth-forgot {
-  margin: -0.25rem 0 0;
-  text-align: right;
-  font-size: 0.9rem;
+.auth-recovery-button {
+  width: 100%;
+  text-decoration: none;
 }
 
-.auth-forgot a,
 .auth-inline-link {
   color: var(--teal-deep);
   text-decoration: underline;
