@@ -8,10 +8,23 @@ This project requires Node.js `>= 20.9.0` to run correctly with Next.js 16.
 
 ```bash
 npm install
+npm run setup   # creates .env.local with auth/document secrets if missing
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000).
+
+`npm run dev` / `npm run build` also run setup automatically (`predev` / `prebuild`).
+
+### Troubleshooting: `Missing CUSTOMER_DATA_KEY`
+
+Auth and document encryption need secrets in `.env.local`. Generate them with:
+
+```bash
+npm run setup
+```
+
+Then restart the dev server. Do not commit `.env.local`.
 
 ### Troubleshooting: `lightningcss.darwin-arm64.node`
 
@@ -24,14 +37,16 @@ npm run dev
 
 ### Optional env
 
-Copy `.env.example` → `.env.local`:
+`.env.local` is created by `npm run setup` (or automatically on `npm install` / `npm run dev`).
+
+Optional overrides:
 
 - `NEXT_PUBLIC_WC_PROJECT_ID` — WalletConnect (MetaMask/Coinbase work without it)
 - `NEXT_PUBLIC_FOLIO_IP_ADDRESS` — deployed `FolioIP` contract on Base or Base Sepolia
-- `CUSTOMER_DATA_KEY` — 32-byte hex key for AES-256-GCM customer profile encryption (`openssl rand -hex 32`)
-- `SESSION_SECRET` — secret for signed login cookies (`openssl rand -hex 32`)
+- `CUSTOMER_DATA_KEY` — AES-256-GCM customer profile key (auto-generated if empty)
+- `SESSION_SECRET` — signed login cookie secret (auto-generated if empty)
 - `EMAIL_INDEX_SECRET` — optional HMAC secret for email lookup (defaults to `CUSTOMER_DATA_KEY`)
-- `DOCUMENT_ENCRYPTION_KEY` — AES-256-GCM key for uploaded documents (falls back to `CUSTOMER_DATA_KEY`)
+- `DOCUMENT_ENCRYPTION_KEY` — document vault key (auto-generated if empty; otherwise falls back to `CUSTOMER_DATA_KEY`)
 
 ### Login & encrypted customer data
 

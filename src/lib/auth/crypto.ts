@@ -17,7 +17,7 @@ function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
   if (!value) {
     throw new Error(
-      `Missing ${name}. Copy .env.example to .env.local and generate secrets.`,
+      `Missing ${name}. Run \`npm run setup\` (or restart \`npm run dev\`) to create .env.local secrets.`,
     );
   }
   return value;
