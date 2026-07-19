@@ -60,7 +60,14 @@ function validateFile(file: File): string | null {
   return null;
 }
 
-export function CertificateUpload() {
+type CertificateUploadProps = {
+  /** When true, page is already behind login; uploads always attach to the session. */
+  requireSession?: boolean;
+};
+
+export function CertificateUpload({
+  requireSession = false,
+}: CertificateUploadProps) {
   const inputId = useId();
   const typeId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -70,6 +77,9 @@ export function CertificateUpload() {
   const [state, setState] = useState<UploadState>({ status: "idle" });
   const [dragging, setDragging] = useState(false);
 
+  const needsWalletForMint = documentType === "copyright_certificate";
+  const canUpload = requireSession || isConnected;
+
   async function uploadFile(file: File) {
     const validationError = validateFile(file);
     if (validationError) {
@@ -77,7 +87,7 @@ export function CertificateUpload() {
       return;
     }
 
-    if (!isConnected || !address) {
+    if (!requireSession && (!isConnected || !address)) {
       setState({
         status: "error",
         message: "Connect your wallet before uploading a document.",
@@ -91,8 +101,10 @@ export function CertificateUpload() {
     const formData = new FormData();
     formData.append("document", file);
     formData.append("certificate", file);
-    formData.append("walletAddress", address);
     formData.append("documentType", documentType);
+    if (address) {
+      formData.append("walletAddress", address);
+    }
 
     try {
       const buffer = await file.arrayBuffer();
@@ -153,6 +165,7 @@ export function CertificateUpload() {
   function onDrop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     setDragging(false);
+    if (!canUpload) return;
     onFileChosen(event.dataTransfer.files?.[0]);
   }
 
@@ -164,12 +177,12 @@ export function CertificateUpload() {
       : state.file;
 
   return (
-    <section className="upload-section" aria-labelledby="upload-heading">
+    <section className="upload-section account-upload" aria-labelledby="upload-heading">
       <div className="section-copy">
-        <h2 id="upload-heading">Secure document vault</h2>
+        <h2 id="upload-heading">Upload documents</h2>
         <p>
-          Upload certificates and supporting files. Folio encrypts them at rest
-          and links them to your wallet for tokenization.
+          Store certificates and supporting files in your encrypted vault.
+          Copyright certificates can be minted once a wallet is connected.
         </p>
       </div>
 
@@ -193,11 +206,11 @@ export function CertificateUpload() {
 
       <div
         className={`upload-dropzone${dragging ? " is-dragging" : ""}${
-          !isConnected ? " is-disabled" : ""
+          !canUpload ? " is-disabled" : ""
         }`}
         onDragEnter={(event) => {
           event.preventDefault();
-          if (isConnected) setDragging(true);
+          if (canUpload) setDragging(true);
         }}
         onDragOver={(event) => {
           event.preventDefault();
@@ -211,7 +224,7 @@ export function CertificateUpload() {
           type="file"
           className="sr-only"
           accept={ACCEPTED_EXTENSIONS}
-          disabled={!isConnected || state.status === "uploading"}
+          disabled={!canUpload || state.status === "uploading"}
           onChange={onInputChange}
         />
 
@@ -234,7 +247,7 @@ export function CertificateUpload() {
           </div>
         ) : state.status === "success" ? (
           <div className="upload-success">
-            <p className="upload-success-title">Stored securely</p>
+            <p className="upload-success-title">Stored in your vault</p>
             <p>
               <strong>{state.originalName}</strong> · {formatBytes(state.size)}
             </p>
@@ -243,9 +256,10 @@ export function CertificateUpload() {
               {state.certificateId}
             </p>
             <p className="upload-hint">
-              {state.linkedToAccount
-                ? "Linked to your Folio account. Manage downloads from Account."
-                : "Encrypted on the server. Sign in before upload to attach it to your account."}
+              Encrypted and linked to your Folio account.
+              {needsWalletForMint && !isConnected
+                ? " Connect a wallet above to mint this certificate."
+                : ""}
             </p>
             <button
               type="button"
@@ -257,7 +271,7 @@ export function CertificateUpload() {
             >
               Upload another
             </button>
-            {state.documentType === "copyright_certificate" && (
+            {state.documentType === "copyright_certificate" && isConnected && (
               <MintIP
                 contentHash={state.contentHash}
                 certificateId={state.certificateId}
@@ -268,9 +282,7 @@ export function CertificateUpload() {
         ) : (
           <>
             <p className="upload-prompt">
-              {isConnected
-                ? "Drag & drop a document, or browse"
-                : "Connect a wallet to enable uploads"}
+              Drag & drop a document, or browse
             </p>
             <p className="upload-hint">
               PDF, PNG, JPEG, WebP, TXT, DOC, DOCX · up to 12 MB · encrypted at
@@ -279,7 +291,7 @@ export function CertificateUpload() {
             <button
               type="button"
               className="cta-secondary"
-              disabled={!isConnected}
+              disabled={!canUpload}
               onClick={() => inputRef.current?.click()}
             >
               Choose file

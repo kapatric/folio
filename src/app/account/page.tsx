@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { AccountPanel } from "@/components/AccountPanel";
 import { AccountWelcome } from "@/components/AccountWelcome";
+import { CertificateUpload } from "@/components/CertificateUpload";
 import { DocumentList } from "@/components/DocumentList";
 import { SiteHeader } from "@/components/SiteHeader";
+import { WalletConnect } from "@/components/WalletConnect";
 import { getSessionCustomer } from "@/lib/auth/session";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +13,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Account — Folio",
   description:
-    "Your Folio account home after sign-in: encrypted profile, documents, and next steps.",
+    "Signed-in Folio workspace: upload documents, manage your encrypted profile, and tokenize IP.",
 };
 
 export default async function AccountPage() {
@@ -40,9 +42,27 @@ export default async function AccountPage() {
       <main className="account-main">
         <AccountWelcome fullName={customer.fullName} email={customer.email} />
 
+        <section
+          className="account-workflow"
+          id="tokenize"
+          aria-labelledby="workflow-heading"
+        >
+          <div className="section-copy">
+            <h2 id="workflow-heading">Document workflow</h2>
+            <p>
+              Internal tools for signed-in accounts: connect a wallet when you
+              are ready to mint, then upload and store documents securely.
+            </p>
+          </div>
+          <div className="account-wallet">
+            <WalletConnect />
+          </div>
+          <CertificateUpload requireSession />
+        </section>
+
         <div className="account-panels">
-          <AccountPanel customer={customer} />
           <DocumentList />
+          <AccountPanel customer={customer} />
         </div>
       </main>
 

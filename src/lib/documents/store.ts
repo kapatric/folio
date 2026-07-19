@@ -104,8 +104,8 @@ export async function storeDocument(input: {
   if (wallet && !ADDRESS_RE.test(wallet)) {
     throw new Error("A valid wallet address is required.");
   }
-  if (!input.ownerCustomerId && !wallet) {
-    throw new Error("Sign in or connect a wallet to store a document.");
+  if (!input.ownerCustomerId) {
+    throw new Error("Sign in required to store a document.");
   }
 
   const bytes = Buffer.from(await file.arrayBuffer());

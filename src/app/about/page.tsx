@@ -44,11 +44,11 @@ export default function AboutPage() {
         </div>
 
         <div className="about-page-actions">
-          <Link href="/#tokenize" className="cta-primary">
-            Start tokenizing
+          <Link href="/login" className="cta-primary">
+            Sign in to upload
           </Link>
-          <Link href="/login" className="cta-secondary">
-            Sign in
+          <Link href="/account#tokenize" className="cta-secondary">
+            Open document workflow
           </Link>
         </div>
       </main>

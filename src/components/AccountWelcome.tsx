@@ -13,12 +13,12 @@ export function AccountWelcome({ fullName, email }: AccountWelcomeProps) {
       <p className="brand-hero account-brand">Folio</p>
       <h1 id="account-welcome-heading">Welcome back, {firstName}.</h1>
       <p className="hero-lede account-welcome-lede">
-        You’re signed in as {email}. Manage your encrypted profile, review
-        stored documents, and continue tokenizing IP on Base.
+        You’re signed in as {email}. Use your private workspace to upload
+        documents, review the vault, and tokenize IP on Base.
       </p>
       <div className="account-welcome-actions">
-        <Link href="/#tokenize" className="cta-primary">
-          Upload a document
+        <Link href="/account#tokenize" className="cta-primary">
+          Go to document upload
         </Link>
         <Link href="/about" className="cta-secondary">
           About Folio
