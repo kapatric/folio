@@ -7,11 +7,14 @@
     "node": ">=20.9.0"
   },
   "scripts": {
+    "setup": "node scripts/ensure-env.js",
+    "predev": "node scripts/ensure-env.js",
+    "prebuild": "node scripts/ensure-env.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "node scripts/ensure-lightningcss.js",
+    "postinstall": "node scripts/ensure-lightningcss.js && node scripts/ensure-env.js",
     "clean": "rm -rf .next node_modules",
     "reinstall": "npm run clean && npm install"
   },

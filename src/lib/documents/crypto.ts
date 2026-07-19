@@ -17,7 +17,7 @@ function resolveKeyMaterial(): string {
   const fallback = process.env.CUSTOMER_DATA_KEY?.trim();
   if (fallback) return fallback;
   throw new Error(
-    "Missing DOCUMENT_ENCRYPTION_KEY (or CUSTOMER_DATA_KEY). Copy .env.example to .env.local.",
+    "Missing DOCUMENT_ENCRYPTION_KEY (or CUSTOMER_DATA_KEY). Run `npm run setup` to create .env.local secrets.",
   );
 }
 
