@@ -68,9 +68,9 @@ Optional overrides:
 ### Login & encrypted customer data
 
 - `/login` — create an account or sign in (redirects to `/account` after success)
-- `/account` — signed-in hub with links to account information and uploaded documents
-- `/account/profile` — encrypted profile and linked wallet
-- `/account/documents` — upload workflow and vault list
+- `/account` — redirects into the account tabs (Account information by default)
+- `/account/profile` — Account information tab: view and edit encrypted customer details
+- `/account/documents` — Uploaded documents tab: upload workflow and vault list
 - Profiles are stored under `.data/customers.json` with **AES-256-GCM** encryption at rest
 - Passwords are **scrypt**-hashed (never stored in plaintext)
 - Email is looked up via HMAC index so the address itself stays inside the encrypted blob

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { AccountPageHeader } from "@/components/AccountPageHeader";
 import { AccountShell } from "@/components/AccountShell";
-import { DocumentsWorkspace } from "@/components/DocumentsWorkspace";
+import { AccountTabs } from "@/components/AccountTabs";
+import { AccountWelcome } from "@/components/AccountWelcome";
 import { requireSessionCustomer } from "@/lib/auth/requireCustomer";
 
 export const dynamic = "force-dynamic";
@@ -13,15 +13,12 @@ export const metadata: Metadata = {
 };
 
 export default async function AccountDocumentsPage() {
-  await requireSessionCustomer();
+  const customer = await requireSessionCustomer();
 
   return (
     <AccountShell footer="Folio · Uploaded documents">
-      <AccountPageHeader
-        title="Uploaded documents"
-        description="Files in your vault are encrypted at rest and available only to your signed-in session."
-      />
-      <DocumentsWorkspace />
+      <AccountWelcome fullName={customer.fullName} email={customer.email} />
+      <AccountTabs customer={customer} initialTab="documents" />
     </AccountShell>
   );
 }
